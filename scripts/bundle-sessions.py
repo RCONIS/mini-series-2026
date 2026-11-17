@@ -5,6 +5,7 @@ from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 root = Path(__file__).resolve().parents[1]
 for session in sorted((root / "sessions").glob("session-*")):
     output = root / "slides" / "download" / (session.name + ".zip")
+    output.parent.mkdir(parents=True, exist_ok=True)
     with ZipFile(output, "w", ZIP_DEFLATED) as bundle:
         for path in sorted(session.rglob("*")):
             relative = path.relative_to(session)

@@ -8,6 +8,8 @@ project:
     - slides/02_workflow_tests.qmd
     - slides/03_tests_shiny.qmd
     - slides/04_optimization_ai.qmd
+  pre-render:
+    - python3 scripts/bundle-sessions.py
   output-dir: docs
   resources:
     - "slides/download/*.zip"

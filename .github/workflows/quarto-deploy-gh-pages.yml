@@ -18,6 +18,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
+      - name: Set up Python for demo downloads
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
       - name: Run Staged dependencies
         uses: insightsengineering/staged-dependencies-action@v1
         env:

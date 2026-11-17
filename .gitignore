@@ -19,3 +19,6 @@ Rprof.out
 /sessions/*/build/
 /sessions/*/library/
 /sessions/*/profile.out
+
+# Participant downloads are rebuilt by the Quarto pre-render hook.
+/slides/download/session-*.zip

@@ -8,13 +8,19 @@ Sessions 3 and 4: TBD.
 - [Website](https://rconis.github.io/mini-series-2026/)
 - `slides/`: four session decks, retaining original author credits.
 - `sessions/session-01` through `session-04`: independent, completed live demos.
-- `slides/download/`: one ZIP per session, linked from the homepage and slides.
+- `slides/download/`: generated ZIPs, linked from the homepage and slides; excluded from version control.
 
 Participants extract a session ZIP, open its R project, run `source("setup.R")`
 once, then `source("demo.R")`. Session 3 also has `launch-app.R`.
 
-Maintainers: run `python3 scripts/bundle-sessions.py` after editing demos.
-Render with `quarto render` after installing dependencies from `DESCRIPTION`.
+Maintainers: edit the normal source files under `sessions/session-01` through
+`session-04`, including the walkthrough comments in each `demo.R`.
+Run `quarto render` after installing dependencies from `DESCRIPTION` and Python 3.
+The project pre-render hook runs `scripts/bundle-sessions.py` automatically,
+creating one ZIP per source directory before Quarto copies downloads into the
+rendered site. A clean checkout needs no existing ZIP files. Generated archives
+exclude local build output, installed libraries, RStudio state, and profiling output.
+To build only the archives, run `python3 scripts/bundle-sessions.py`.
 The program is recorded in `slides/resources/program.csv`.
 
 Adapted teaching materials: CC BY-SA 4.0, with stated exceptions. New demo code

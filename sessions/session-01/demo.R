@@ -1,0 +1,10 @@
+# Run from the session folder. Re-running overwrites only generated build output.
+roxygen2::roxygenise("simulatr")
+devtools::check("simulatr", document = FALSE, error_on = "warning")
+dir.create("build", showWarnings = FALSE)
+archive <- devtools::build("simulatr", path = "build")
+dir.create("library", showWarnings = FALSE)
+install.packages(archive, repos = NULL, type = "source", lib = "library")
+library(simulatr, lib.loc = "library")
+set.seed(42)
+print(simulate_groups(5, effect = 1))

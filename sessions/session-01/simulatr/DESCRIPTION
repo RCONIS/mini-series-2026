@@ -1,0 +1,11 @@
+Package: simulatr
+Title: Simulate Two Groups for a Live Demo
+Version: 0.1.0
+Authors@R: person("Daniel", "Sabanés Bové", role = c("aut", "cre"), email = "daniel.sabanes.bove@rconis.com")
+Description: A small complete package demonstrating simulation, documentation,
+    clean code and tests using synthetic data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Suggests: testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1

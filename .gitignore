@@ -15,3 +15,7 @@ docs
 Rprof.out
 
 **/*.quarto_ipynb
+
+/sessions/*/build/
+/sessions/*/library/
+/sessions/*/profile.out

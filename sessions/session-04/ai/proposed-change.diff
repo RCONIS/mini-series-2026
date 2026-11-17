@@ -1,0 +1,11 @@
+--- before.R
++++ after.R
+@@ -1,2 +1,7 @@
+ #' Center numeric values around their mean.
+-center_values <- function(x) x - mean(x)
++#' @param x Numeric vector.
++#' @param na.rm Remove missing values when calculating the mean.
++#' @return A numeric vector; missing positions remain missing.
++center_values <- function(x, na.rm = FALSE) {
++  x - mean(x, na.rm = na.rm)
++}

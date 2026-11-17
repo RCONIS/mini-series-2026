@@ -1,0 +1,13 @@
+source("optimization.R")
+set.seed(42)
+x <- matrix(rnorm(200000), ncol = 20)
+testthat::expect_equal(row_means_slow(x), row_means_fast(x))
+print(system.time(row_means_slow(x)))
+print(system.time(row_means_fast(x)))
+# Timings vary by laptop; compare results before interpreting speed.
+Rprof("profile.out")
+for (i in seq_len(10)) invisible(row_means_slow(x))
+Rprof(NULL)
+print(summaryRprof("profile.out")$by.total)
+source("ai/after.R")
+testthat::test_dir("tests", stop_on_failure = TRUE)

@@ -10,11 +10,23 @@ The Zurich 2026 revision by Daniel Sabanés Bové builds on:
 - [Munich 2026](https://github.com/openstatsware/shortcourse-munich2026), the source of updated introduction, R packages, package quality, collaboration, publication, and conclusion sections, and their referenced images and keyboard-shortcut table.
 - Munich's preceding [Seoul 2026](https://github.com/openstatsware/shortcourse-seoul2026) revision and the earlier [Montreal course](https://github.com/openpharma/workshop-r-swe-mtl), as recorded in the source history.
 
-Zurich retains the workflow, Shiny, and supplementary reproducibility chapters.
-Changes for 2026 include ETH course information and links, the two-day schedule ending at 16:30,
-the event history, a roxygen2 tags overview, SSH setup from RStudio, removal of the optimization chapter,
-and a new Using AI chapter. The shared license footer records this adaptation; the repository license
-file is aligned with the CC BY-SA 4.0 notices already used by the course materials.
+## JnJ mini-series adaptation (November 2026)
+
+Daniel Sabanés Bové reorganized the Zurich 2026 materials into four online sessions:
+R package structure and building; workflow, clean code and unit tests; more tests
+and Shiny development; optimization and AI best practices. Classroom exercises
+were replaced with completed live demonstrations. The standalone introduction,
+collaboration, publication, and conclusion chapters were removed, along with
+old exercise/solution downloads. Dates, venue, navigation, and source links were
+updated for this repository. A lengthy external AI application example was removed.
+Original author credits are retained in each adapted chapter section.
+
+New examples and demo notes under `sessions/`, including their copies in the four
+session ZIPs, are MIT licensed, copyright 2026 Daniel Sabanés Bové. These are
+new implementations, not relicensed copies of the previous simulatr archive.
+The older examples still referenced by slides retain their original licenses.
+The root CC BY-SA license applies to adapted teaching materials, not files with
+an explicit separate license.
 
 ## Third-party graphic
 
@@ -22,5 +34,4 @@ file is aligned with the CC BY-SA 4.0 notices already used by the course materia
 Pierre DeBois, [“AI Made R Packages Easy to Write. But Did It Make Packages in CRAN Better?”](https://medium.datadriveninvestor.com/ai-made-r-packages-easy-to-write-but-did-it-make-packages-in-cran-better-2569bd217e13),
 DataDrivenInvestor, 23 September 2026. It is excluded from the course's CC BY-SA license;
 no additional reuse license is asserted. Credit appears beside the graphic and in the AI chapter's license slide.
-The supplementary reproducibility chapter retains its separately stated CC BY-NC 4.0 license and Louisa Smith attribution.
 Other images retain their existing on-slide credits. Example software retains the licenses shipped in its directories.

@@ -10,4 +10,7 @@ Depends:
   testthat,
   checkmate,
   covr,
-  rhub
+  shiny,
+  profvis,
+  roxygen2,
+  devtools

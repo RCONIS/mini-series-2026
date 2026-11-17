@@ -1,12 +1,20 @@
-# GSWEP4R Workshop @ Zurich, Switzerland, 8–9 October 2026
+# GSWEP4R mini-series — JnJ (online)
 
-Sources and materials for *Good Software Engineering Practice for R Packages*, part of Zurich R Courses at ETH Zurich.
+Four sessions on R package structure and building; workflow, clean code and unit
+tests; further testing and Shiny development; optimization and AI best practices.
+Sessions 1 and 2 take place on 19 and 20 November 2026. Sessions 3 and 4: TBD.
 
-- [Workshop website](https://rconis.github.io/workshop-zurich-2026/)
-- [Official course information](https://math.ethz.ch/sfs/education/zurich-r-courses/r-packages.html)
-- [openstatsware](https://openstatsware.org)
+- [Website](https://rconis.github.io/mini-series-2026/)
+- `slides/`: four session decks, retaining original author credits.
+- `sessions/session-01` through `session-04`: independent, completed live demos.
+- `slides/download/`: one ZIP per session, linked from the homepage and slides.
 
-Render locally with `quarto render` after installing the R dependencies in `DESCRIPTION`.
-The program is maintained in `slides/resources/program.csv`.
+Participants extract a session ZIP, open its R project, run `source("setup.R")`
+once, then `source("demo.R")`. Session 3 also has `launch-app.R`.
 
-The Zurich 2026 materials incorporate updates from Munich 2026. See [attribution notes](ATTRIBUTION.md) for source history, changes, and image credits. Course materials are CC BY-SA 4.0 unless separately credited.
+Maintainers: run `python3 scripts/bundle-sessions.py` after editing demos.
+Render with `quarto render` after installing dependencies from `DESCRIPTION`.
+The program is recorded in `slides/resources/program.csv`.
+
+Adapted teaching materials: CC BY-SA 4.0, with stated exceptions. New demo code
+and notes: MIT. See [attribution](ATTRIBUTION.md) and per-directory licenses.

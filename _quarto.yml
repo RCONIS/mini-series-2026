@@ -1,11 +1,22 @@
 project:
   type: website
+  render:
+    - index.qmd
+    - listing.qmd
+    - ATTRIBUTION.md
+    - slides/01_packages.qmd
+    - slides/02_workflow_tests.qmd
+    - slides/03_tests_shiny.qmd
+    - slides/04_optimization_ai.qmd
   output-dir: docs
+  resources:
+    - "slides/download/*.zip"
+    - ATTRIBUTION.md
 
 website:
-  title: "GSWEP4R Workshop"
+  title: "GSWEP4R Mini-series — JnJ (online)"
   description: "`openstatsware` Workshop: Good Software Engineering Practice with R"
-  site-url: https://RCONIS.github.io/workshop-zurich-2026/
+  site-url: https://RCONIS.github.io/mini-series-2026/
   search: true
   navbar:
     left:
@@ -22,7 +33,7 @@ website:
       - text: "About RCONIS"
         href: https://rconis.com/
       - text: "Source Code on GitHub"
-        href: https://github.com/RCONIS/workshop-zurich-2026
+        href: https://github.com/RCONIS/mini-series-2026
 
 format:
   html:

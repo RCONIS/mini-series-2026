@@ -14,7 +14,7 @@ project:
     - ATTRIBUTION.md
 
 website:
-  title: "GSWEP4R Mini-series — JnJ (online)"
+  title: "GSWEP4R Mini-series"
   description: "`openstatsware` Workshop: Good Software Engineering Practice with R"
   site-url: https://RCONIS.github.io/mini-series-2026/
   search: true

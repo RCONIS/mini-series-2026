@@ -6,16 +6,6 @@ author: Daniel Sabanés Bové
 date: "2026-11-19"
 ---
 
-## Session 1: JnJ (online)
-
-19 November 2026
-
-[Download all session 1 demo code](download/session-01.zip).
-Extract it, open `session-01.Rproj`, run `source("setup.R")` once,
-then follow `demo.R` alongside the instructor.
-
-
-
 # Introduction
 
 ## What you know already

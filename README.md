@@ -1,8 +1,9 @@
-# GSWEP4R mini-series — JnJ (online)
+# GSWEP4R mini-series
 
 Four sessions on R package structure and building; workflow, clean code and unit
 tests; further testing and Shiny development; optimization and AI best practices.
-Sessions 1 and 2 take place on 19 and 20 November 2026. Sessions 3 and 4: TBD.
+Sessions 1 and 2 take place on 19 and 20 November 2026 (for JnJ, online). 
+Sessions 3 and 4: TBD.
 
 - [Website](https://rconis.github.io/mini-series-2026/)
 - `slides/`: four session decks, retaining original author credits.

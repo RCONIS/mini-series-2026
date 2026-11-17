@@ -5,16 +5,6 @@ image: thumbnails/speed.jpg
 author: Daniel Sabanés Bové
 ---
 
-## Session 4: JnJ (online)
-
-Date TBD
-
-[Download all session 4 demo code](download/session-04.zip).
-Extract it, open `session-04.Rproj`, run `source("setup.R")` once,
-then follow `demo.R` alongside the instructor.
-
-
-
 ## Acknowledgments
 
 This section is adapted from slides by Lukas A. Widmer and Michael Mayer, which they prepared and released under the CC BY 4.0 license, see their course [Go fastR – how to make R code fast(er) and run it on high performance compute (HPC) clusters](https://luwidmer.github.io/fastR-website/materials.html).
@@ -235,9 +225,9 @@ The article raises concerns about documentation; do not infer a causal effect of
 The graphic is third-party content and is excluded from the course's CC BY-SA license.
 :::
 
-## 2024 vs. 2026
+## 2025 vs. 2026
 
-| Disappointment in 2024 | Productive use in 2026 |
+| Disappointment mid-2025 | Productive use in 2026 |
 | --- | --- |
 | Bad at translating code (e.g. R to Julia) | Translates code well between e.g. SAS and R |
 | Bad at mathematics, e.g. inverse functions | Can solve difficult math problems |

@@ -5,16 +5,6 @@ image: thumbnails/shiny.jpg
 author: Daniel Sabanés Bové
 ---
 
-## Session 3: JnJ (online)
-
-Date TBD
-
-[Download all session 3 demo code](download/session-03.zip).
-Extract it, open `session-03.Rproj`, run `source("setup.R")` once,
-then follow `demo.R` alongside the instructor.
-
-
-
 # More on tests
 
 ## testthat comparisons functions (1/2)

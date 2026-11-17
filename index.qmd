@@ -34,8 +34,7 @@ in RStudio or Ctrl+C in a terminal.
 
 Each download is self-contained, with completed code, synthetic data generated
 locally, a README, and its license. No code from a previous session is required.
-An AI account or API key is not needed for session 4: a prepared change, tests,
-and review are included.
+Session 4 includes an optimization demo; AI best practices are covered in the slides.
 
 ## Further reading
 

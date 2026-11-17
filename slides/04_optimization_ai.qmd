@@ -201,14 +201,15 @@ Download and extract [session-04.zip](download/session-04.zip), open
 `session-04.Rproj`, and run `source("setup.R")` once, then `source("demo.R")`.
 All code is complete; participants can follow the instructor on their laptop.
 
-Compare equivalent slow and vectorized implementations; profile the slow version and review the prepared AI change.
+Compare equivalent slow and vectorized implementations; profile the slow version.
 
 # License Information
 
 - Creators (initial authors): 
   Lukas A. Widmer and Michael Mayer, see their course [Go fastR – how to make R code fast(er) and run it on high performance compute (HPC) clusters](https://luwidmer.github.io/fastR-website/materials.html)
 - In the current version, changes were done by (later author):
-  Daniel Sabanes Bove [`r fontawesome::fa("github")`](https://github.com/danielinteractive/) [`r fontawesome::fa("linkedin")`](https://www.linkedin.com/in/danielsabanesbove/)
+  Daniel Sabanés Bové [`r fontawesome::fa("github")`](https://github.com/danielinteractive/) [`r fontawesome::fa("linkedin")`](https://www.linkedin.com/in/danielsabanesbove/)
+
 {{< include _license_footer.qmd >}}
 
 ## AI makes packages easier to write
@@ -384,13 +385,6 @@ The next slide applies this pattern to an R session and package documentation.
 - Review proposed actions before allowing writes or external side effects.
 - Keep credentials out of source code and prompts.
 - Verify tool outputs with reproducible local checks.
-
-## Live demo: review one prepared AI change
-
-- Read `ai/brief.md`, `ai/project-instructions.md`, and `ai/proposed-change.diff` in the session 4 download.
-- Compare `ai/before.R` and `ai/after.R`, including documentation and tests.
-- Run `demo.R` to verify the result locally. Discuss the review in `ai/review.md`.
-- An instructor may demonstrate an assistant; participants need no AI account or API key.
 
 ## Credits and license {.smaller}
 

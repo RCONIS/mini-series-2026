@@ -9,7 +9,7 @@ project:
     - slides/03_tests_shiny.qmd
     - slides/04_optimization_ai.qmd
   pre-render:
-    - python3 scripts/bundle-sessions.py
+    - Rscript scripts/bundle-sessions.R
   output-dir: docs
   resources:
     - "slides/download/*.zip"

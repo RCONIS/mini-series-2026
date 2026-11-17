@@ -1,5 +1,7 @@
 Package: workshop.gswep
 Version: 0.1.0.9000
+Imports:
+  zip
 Depends:
   tidyverse,
   tidygraph,

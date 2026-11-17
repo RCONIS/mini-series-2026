@@ -15,12 +15,12 @@ once, then `source("demo.R")`. Session 3 also has `launch-app.R`.
 
 Maintainers: edit the normal source files under `sessions/session-01` through
 `session-04`, including the walkthrough comments in each `demo.R`.
-Run `quarto render` after installing dependencies from `DESCRIPTION` and Python 3.
-The project pre-render hook runs `scripts/bundle-sessions.py` automatically,
+Run `quarto render` after installing the R dependencies from `DESCRIPTION`.
+The project pre-render hook runs `scripts/bundle-sessions.R` automatically,
 creating one ZIP per source directory before Quarto copies downloads into the
 rendered site. A clean checkout needs no existing ZIP files. Generated archives
 exclude local build output, installed libraries, RStudio state, and profiling output.
-To build only the archives, run `python3 scripts/bundle-sessions.py`.
+To build only the archives, run `Rscript scripts/bundle-sessions.R`.
 The program is recorded in `slides/resources/program.csv`.
 
 Adapted teaching materials: CC BY-SA 4.0, with stated exceptions. New demo code

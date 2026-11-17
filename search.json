@@ -1,0 +1,1024 @@
+[
+  {
+    "objectID": "slides/04_optimization_ai.html#acknowledgments",
+    "href": "slides/04_optimization_ai.html#acknowledgments",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Acknowledgments",
+    "text": "Acknowledgments\nThis section is adapted from slides by Lukas A. Widmer and Michael Mayer, which they prepared and released under the CC BY 4.0 license, see their course Go fastR – how to make R code fast(er) and run it on high performance compute (HPC) clusters.\nThanks a lot Lukas and Michael!"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#a-word-of-wisdom",
+    "href": "slides/04_optimization_ai.html#a-word-of-wisdom",
+    "title": "4. Code optimization and AI best practices",
+    "section": "A Word of Wisdom",
+    "text": "A Word of Wisdom\n\n[@knuth1974structured, p. 268]"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#setting-the-right-priorities",
+    "href": "slides/04_optimization_ai.html#setting-the-right-priorities",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Setting the right priorities",
+    "text": "Setting the right priorities\n\nThe code needs to be correct, i.e. calculate correct results as expected. → Tests, Debugging\nIf it is correct, but too slow, then find out which calculations and why they are too slow. → Profiling\nOnce you identified the slow parts, optimize those. → Code optimization\nIf executing the code on your laptop is still too slow → consider running it instead on a high performance cluster (HPC), see slides from Lukas and Michael"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#tests-see-previous-section",
+    "href": "slides/04_optimization_ai.html#tests-see-previous-section",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Tests: see previous section",
+    "text": "Tests: see previous section\n\n(modified from @xkcd, No. 303)"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#debugging-a-few-pointers",
+    "href": "slides/04_optimization_ai.html#debugging-a-few-pointers",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Debugging: A few pointers",
+    "text": "Debugging: A few pointers\n\nPost-hoc traceback() after code fails, to show the call stack and see how the error came about.\nSetting debug(myfun) for the problematic function myfun and then run the code to step through its execution.\nInject browser() calls into problematic code to add “breakpoints” for interactive execution and inspection.\nSetting options(error = recover) and then running the problematic code allows you to jump into the call stack and inspect. (Undo with options(error = NULL))"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#debugging-some-rstudio-specifics",
+    "href": "slides/04_optimization_ai.html#debugging-some-rstudio-specifics",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Debugging: Some RStudio specifics",
+    "text": "Debugging: Some RStudio specifics\nLet’s have a look at RStudio IDE specific details.\n\nThe “Debug” menu can be useful to explore the options.\nEditor breakpoints: Can add with click to the left of line number and gives “red dot”.\nClick on “Source” to run the script and enter debug mode.\n“Debug” &gt; “On Error” &gt; “Break in Code” again lets you jump into the code on error.\nDebugging in Rmarkdown documents can be tricky, either proceed chunk by chunk, or try sink()\n\nSee Posit website for details."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#profiling-definition",
+    "href": "slides/04_optimization_ai.html#profiling-definition",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Profiling: Definition",
+    "text": "Profiling: Definition\n\nIn software engineering, profiling (“program profiling”, “software profiling”) is a form of dynamic program analysis that measures, for example, the space (memory) or time complexity of a program, the usage of particular instructions, or the frequency and duration of function calls. Most commonly, profiling information serves to aid program optimization, and more specifically, performance engineering.\n\n(Wikipedia)"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#profiling-example-code",
+    "href": "slides/04_optimization_ai.html#profiling-example-code",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Profiling: Example code",
+    "text": "Profiling: Example code\n\nf &lt;- function() {\n    profvis::pause(0.1)\n    for (i in seq_len(3)) {\n        g()\n    }\n}\ng &lt;- function() {\n    profvis::pause(0.1)\n}"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#profiling-lets-identify-the-bottlenecks",
+    "href": "slides/04_optimization_ai.html#profiling-lets-identify-the-bottlenecks",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Profiling: Let’s identify the bottlenecks!",
+    "text": "Profiling: Let’s identify the bottlenecks!\nIn R there are a couple of basic functions for profiling:\n\nsystem.time()\nRprof:\n\nstart with Rprof()\nexecute the code\nstop with Rprof(NULL)\nsummarize with summaryRprof()\n\n\nSee e.g. @peng2016, chapter 19, for details."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#profiling-classic-rprof-output",
+    "href": "slides/04_optimization_ai.html#profiling-classic-rprof-output",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Profiling: Classic Rprof output",
+    "text": "Profiling: Classic Rprof output\n\nRprof()\nf()\nRprof(NULL)\nsummaryRprof()\n\n$by.self\n                    self.time self.pct total.time total.pct\n\"profvis::pause\"         0.40       80       0.40        80\n\"g\"                      0.02        4       0.32        64\n\"registerS3methods\"      0.02        4       0.04         8\n\"assignWrapped\"          0.02        4       0.02         4\n\"readRDS\"                0.02        4       0.02         4\n\"stopifnot\"              0.02        4       0.02         4\n\n$by.total\n                          total.time total.pct self.time self.pct\n\".main\"                         0.50       100      0.00        0\n\"block_exec\"                    0.50       100      0.00        0\n\"call_block\"                    0.50       100      0.00        0\n\"eng_r\"                         0.50       100      0.00        0\n\"eval_with_user_handlers\"       0.50       100      0.00        0\n\"eval\"                          0.50       100      0.00        0\n\"evaluate_call\"                 0.50       100      0.00        0\n\"evaluate::evaluate\"            0.50       100      0.00        0\n\"evaluate\"                      0.50       100      0.00        0\n\"execute\"                       0.50       100      0.00        0\n\"f\"                             0.50       100      0.00        0\n\"handle\"                        0.50       100      0.00        0\n\"in_dir\"                        0.50       100      0.00        0\n\"in_input_dir\"                  0.50       100      0.00        0\n\"knitr::knit\"                   0.50       100      0.00        0\n\"process_file\"                  0.50       100      0.00        0\n\"process_group.block\"           0.50       100      0.00        0\n\"process_group\"                 0.50       100      0.00        0\n\"rmarkdown::render\"             0.50       100      0.00        0\n\"timing_fn\"                     0.50       100      0.00        0\n\"withCallingHandlers\"           0.50       100      0.00        0\n\"withVisible\"                   0.50       100      0.00        0\n\"profvis::pause\"                0.40        80      0.40       80\n\"g\"                             0.32        64      0.02        4\n\"loadNamespace\"                 0.08        16      0.00        0\n\"namespaceImport\"               0.08        16      0.00        0\n\"asNamespace\"                   0.06        12      0.00        0\n\"namespaceImportFrom\"           0.06        12      0.00        0\n\"registerS3methods\"             0.04         8      0.02        4\n\"assignWrapped\"                 0.02         4      0.02        4\n\"readRDS\"                       0.02         4      0.02        4\n\"stopifnot\"                     0.02         4      0.02        4\n\".checkGroupSigLength\"          0.02         4      0.00        0\n\".registerS3method\"             0.02         4      0.00        0\n\".updateMethodsInTable\"         0.02         4      0.00        0\n\"is\"                            0.02         4      0.00        0\n\"methods::cacheMetaData\"        0.02         4      0.00        0\n\"Recall\"                        0.02         4      0.00        0\n\n$sample.interval\n[1] 0.02\n\n$sampling.time\n[1] 0.5"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#profiling-getting-visual",
+    "href": "slides/04_optimization_ai.html#profiling-getting-visual",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Profiling: Getting visual",
+    "text": "Profiling: Getting visual\nWe can use the more modern profvis R package for visualizing where R spends its time during code execution.\n\nlibrary(profvis)\nsource(\"examples/optimization/profexample.R\") # Such that the flame graph includes code lines.\nprof &lt;- profvis({\n    f()\n})\nprint(prof)"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#profiling-profvis-output",
+    "href": "slides/04_optimization_ai.html#profiling-profvis-output",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Profiling: profvis output",
+    "text": "Profiling: profvis output"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#code-optimization-explore-alternatives",
+    "href": "slides/04_optimization_ai.html#code-optimization-explore-alternatives",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Code optimization: Explore alternatives",
+    "text": "Code optimization: Explore alternatives\n\nIf the slow function is from another package, search for a faster one\nRuntime complexity (runtime as a function of data size) of different algorithms can be wildly different - some work well on small data but take forever on large data\nFew examples:\n\nFor wrangling data frames, consider duckplyr and polars as alternatives to dplyr\nTo read and write CSV data, consider vroom instead of base R\nTo read and write objects from and to disk, consider qs instead of base R readRDS, saveRDS"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#code-optimization-dry-on-data-frames",
+    "href": "slides/04_optimization_ai.html#code-optimization-dry-on-data-frames",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Code optimization: DRY on data frames",
+    "text": "Code optimization: DRY on data frames\n\nRemember: DRY (Don’t Repeat Yourself)\nData frames are expensive, i.e. take a lot of time.\nSome examples:\n\nOnly create data frames, if really necessary.\n\nBad: if(nrow(filter(x, condition)) &gt; 0)\nGood: if(any(condition))\n\nAssemble a data frame only once, not iteratively.\nWhen subsetting a data frame and working with a column, first extract the column and then subset."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#code-optimization-reuse-dont-copy",
+    "href": "slides/04_optimization_ai.html#code-optimization-reuse-dont-copy",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Code optimization: Reuse, don’t copy",
+    "text": "Code optimization: Reuse, don’t copy\nAvoid making unintended copies of objects.\n\n# Bad:\nresult &lt;- c()\nfor (i in 1:1000) result &lt;- c(result, fun(i))\n# Good:\nresult &lt;- numeric(1000)\nfor (i in 1:1000) result[i] &lt;- fun(i)\n# Better:\nresult &lt;- sapply(seq_len(1000), fun)\n\nOther examples:\n\nCreate a data.frame once from complete column vectors, rather than rbind() it iteratively.\nSubsetting a matrix or data.frame will create a copy, so use it consciously or better work with columns."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#code-optimization-vectorize-where-possible",
+    "href": "slides/04_optimization_ai.html#code-optimization-vectorize-where-possible",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Code optimization: Vectorize where possible",
+    "text": "Code optimization: Vectorize where possible\n\nAvoiding for loops does not help much anymore.\nHowever, using specialized vectorized functions (implemented in compiled code) helps:\n\nBase R: rowSums(), colSums(), rowMeans(), colMeans()\nmatrixStats: many! anyMissing(), colQuantiles(), rowMax(), etc.\ncollapse: fmean(), TRA(), GRP(), …"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#code-optimization-still-too-slow",
+    "href": "slides/04_optimization_ai.html#code-optimization-still-too-slow",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Code optimization: Still too slow?",
+    "text": "Code optimization: Still too slow?\n\n“R is a language optimized for human performance, not computer performance”\n\n(Hadley Wickham, New York R Conference, 2018)"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#code-optimization-shift-to-c-with-rcpp",
+    "href": "slides/04_optimization_ai.html#code-optimization-shift-to-c-with-rcpp",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Code optimization: Shift to C++ with Rcpp",
+    "text": "Code optimization: Shift to C++ with Rcpp\nWriting and using C++ code in your R package is not easy.\nBut it is not too difficult with Rcpp by @Eddelbuettel2011.\n\nStarting point: Rcpp::Rcpp.package.skeleton()\nUse RcppArmadillo for linear algebra\nHadley Wickham’s chapter Rewriting R code in C++\n\nNote: Adding C++ code to your package will in many cases increase the maintenance effort significantly."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#references",
+    "href": "slides/04_optimization_ai.html#references",
+    "title": "4. Code optimization and AI best practices",
+    "section": "References",
+    "text": "References"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#ai-makes-packages-easier-to-write",
+    "href": "slides/04_optimization_ai.html#ai-makes-packages-easier-to-write",
+    "title": "4. Code optimization and AI best practices",
+    "section": "AI makes packages easier to write",
+    "text": "AI makes packages easier to write\n\n\n\nIllustration accompanying Pierre DeBois’s article about AI and R package quality\n\n\nMore generated code makes design, documentation, and review even more valuable.\nGraphic: Pierre DeBois, AI Made R Packages Easy to Write. But Did It Make Packages in CRAN Better?, DataDrivenInvestor, 23 September 2026\n\nUse the graphic to open a discussion: what makes a package useful and trustworthy? The article raises concerns about documentation; do not infer a causal effect of AI from the illustration. The graphic is third-party content and is excluded from the course’s CC BY-SA license."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#vs.-2026",
+    "href": "slides/04_optimization_ai.html#vs.-2026",
+    "title": "4. Code optimization and AI best practices",
+    "section": "2025 vs. 2026",
+    "text": "2025 vs. 2026\n\n\n\n\n\n\n\nDisappointment mid-2025\nProductive use in 2026\n\n\n\n\nBad at translating code (e.g. R to Julia)\nTranslates code well between e.g. SAS and R\n\n\nBad at mathematics, e.g. inverse functions\nCan solve difficult math problems\n\n\nBad at writing tests\nDraft tests, run them, and investigate failures\n\n\nBad at slide generation\nCreate and revise slides with visual feedback\n\n\nMade up literature references\nCan reliably find literature references\n\n\n\n\nThis is a retrospective on my own experience, not a guarantee for every task or model. For R-to-Julia translation, check missing values, indexing, types, and numerical tolerances. For an inverse, substitute back into the original function and check the domain. For literature, open the paper and verify authors, DOI, and the claim it supports.\nAll of these are now possible with current AI tools. Tool access and iterative feedback have changed the experience substantially But success still needs checking!"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#keep-the-engineering-workflow",
+    "href": "slides/04_optimization_ai.html#keep-the-engineering-workflow",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Keep the engineering workflow",
+    "text": "Keep the engineering workflow\nDesign → Plan → Implement in steps → Check → Review\n\nExplain the user need, interface, constraints, and acceptance criteria\nAsk the assistant to inspect the project and propose a plan\nImplement one small, reviewable change at a time\nRun examples, tests, and package checks; inspect the results\nReview the diff and update documentation before committing\n\nHadley Wickham’s Tidy design principles provide useful reading for designing APIs that humans and assistants can understand.\n\nExample prompt: “Read the design vignette and existing tests. Propose a plan for adding a missing-value option without changing existing defaults. Wait for my review of the plan before implementing.” Discuss where a human decision is needed: the API, statistical assumptions, acceptance criteria, and final review."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#choose-an-ide-that-fits-your-work",
+    "href": "slides/04_optimization_ai.html#choose-an-ide-that-fits-your-work",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Choose an IDE that fits your work",
+    "text": "Choose an IDE that fits your work\n\n\n\nIDE\nUseful AI integration\n\n\n\n\nVS Code\nGitHub Copilot for inline/tab completion and chat; extensions for Claude Code and Codex\n\n\nPositron\nPosit’s AI integration, Posit Assistant, with context from your R session, objects, plots, and console history\n\n\n\n\nTab completion helps with a local edit; an agent can work across files and run checks\nStart with a small task and inspect the changes and tool output\nChoose approved providers and share only data and code you are allowed to send\n\n\nPosit Assistant is the current name in the Positron documentation (October 2026). Participants can continue using RStudio for the package live demos; switching IDE is optional. Accounts, available models, and costs depend on the chosen provider and setup."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#instructions-for-your-project",
+    "href": "slides/04_optimization_ai.html#instructions-for-your-project",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Instructions for your project",
+    "text": "Instructions for your project\nAGENTS.md gives compatible coding agents shared project context. Put it at the repository root; use scoped instructions where needed.\nKeep instructions short, accurate, and version controlled. Check how your assistant discovers them.\nExample:\n# Working on this R package\n\n- Read DESCRIPTION, the design vignette, and CONTRIBUTING.md first.\n- Keep public function signatures and defaults stable unless requested.\n- Edit roxygen source; regenerate Rd and NAMESPACE with devtools::document().\n- Add tests for changed behavior; run devtools::test() and devtools::check().\n- Update vignettes and NEWS.md for user-visible changes.\n- Explain mathematical changes and benchmark performance claims.\n- Report the changed files, check results, and unresolved questions.\n\nAGENTS.md gives project-wide conventions; a skill gives task-specific guidance; a prompt gives the immediate task. Additional examples: tests/AGENTS.md can describe reference data and tolerances; src/AGENTS.md can explain compiled-code conventions. Support and discovery rules vary across assistants. Instructions do not replace permissions or sandbox controls."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#give-the-assistant-skills",
+    "href": "slides/04_optimization_ai.html#give-the-assistant-skills",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Give the assistant skills",
+    "text": "Give the assistant skills\n\nA SKILL.md packages instructions for a particular kind of task\nExplore posit-dev/skills\n\nUse r-package-development for R package conventions and development guidance\nUse critical-code-reviewer to request a critical review with concrete findings\n\nInstall using your assistant’s supported mechanism, then check that the relevant skill is loaded\n\nSkills supply reusable guidance; project documentation supplies the facts about your package.\n\nRead a skill before installing it. Check its assumptions and commands against your project. Ask: “Use the R package development skill for this change, then use the critical code reviewer skill to review the diff. Report each finding with its location and a suggested fix.” Loading and activation differ between tools; linking a file in a prompt does not necessarily install a skill."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#keep-documentation-and-code-in-sync",
+    "href": "slides/04_optimization_ai.html#keep-documentation-and-code-in-sync",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Keep documentation and code in sync",
+    "text": "Keep documentation and code in sync\nExample from our mmrm work: use the mathematical description to identify a faster algorithm, then implement it in code.\n\nStart with the current mathematical documentation, assumptions, and notation\nAsk for an optimization proposal and review the derivation\nImplement in steps; compare with the existing implementation and benchmark\nUpdate the math description, code, tests, and relevant release notes together\n\n\nThis is the instructor’s experience supplied for the course, not a claim that the linked vignette documents a particular AI-assisted change or measured speedup. For a numerical algorithm, compare estimates, covariance matrices, likelihoods, convergence, and edge cases as appropriate. Report both correctness evidence and benchmark conditions. Do not treat the optimized implementation as the sole source of expected test values."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#very-important",
+    "href": "slides/04_optimization_ai.html#very-important",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Very Important",
+    "text": "Very Important\n\nFrom https://tidydesign.substack.com/p/y-code-when-ai by Hadley Wickham"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#important-review-the-result-including-tests",
+    "href": "slides/04_optimization_ai.html#important-review-the-result-including-tests",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Important: Review the result, including tests",
+    "text": "Important: Review the result, including tests\n\nDoes the implementation meet the design and preserve the public API?\nDo tests check independent expected results, boundaries, and failure cases?\nAre examples runnable and documentation consistent with the code?\nAre dependencies and external references real and necessary?\nHave you read the diff and the actual check output?\n\nUse a fresh review pass; fix the findings and rerun affected checks. AI review can be very helpful for larger diffs (but ideally you want small diffs).\n\nAn assistant can write code and tests that agree with the same misunderstanding. Use a hand-calculated example or a separately trusted implementation where possible. Ask the reviewer to identify risks and missing evidence, rather than simply asking “Is this good?”. A second AI review complements human review."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#model-context-protocol",
+    "href": "slides/04_optimization_ai.html#model-context-protocol",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Model Context Protocol",
+    "text": "Model Context Protocol\nModel Context Protocol (MCP) is an open protocol that gives AI applications a standard way to connect with external systems.\n\nAn MCP server advertises capabilities to an AI application’s MCP client\nThose capabilities can include tools (actions), resources (context or data), and reusable prompts\nThe model can request a capability; the client executes it and returns the result to the conversation\nServers may be local or remote, so access controls and the data exposed still matter\n\n\nMCP standardizes the connection, not the model’s judgement. The client controls which servers are available and should show or enforce appropriate permissions before a tool has side effects. The next slide applies this pattern to an R session and package documentation."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#r-as-an-mcp-server",
+    "href": "slides/04_optimization_ai.html#r-as-an-mcp-server",
+    "title": "4. Code optimization and AI best practices",
+    "section": "R as an MCP server",
+    "text": "R as an MCP server\n\nFrom https://posit-dev.github.io/mcptools/"
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#use-tool-connections-deliberately",
+    "href": "slides/04_optimization_ai.html#use-tool-connections-deliberately",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Use tool connections deliberately",
+    "text": "Use tool connections deliberately\n\nGive an assistant only the tools and data needed for the task.\nReview proposed actions before allowing writes or external side effects.\nKeep credentials out of source code and prompts.\nVerify tool outputs with reproducible local checks."
+  },
+  {
+    "objectID": "slides/04_optimization_ai.html#credits-and-license",
+    "href": "slides/04_optimization_ai.html#credits-and-license",
+    "title": "4. Code optimization and AI best practices",
+    "section": "Credits and license",
+    "text": "Credits and license\n\nChapter author: Daniel Sabanés Bové, Zurich 2026\nGraphic: Pierre DeBois, DataDrivenInvestor, 23 September 2026. Supplied for this course; third-party content excluded from the course’s CC BY-SA license. No additional reuse license is asserted.\nTechnical sources are linked on the relevant slides; further reading: Tidy design principles\nUnless separately credited, this work is licensed under CC BY-SA 4.0.\nJnJ mini-series sources adapt Zurich 2026, Zurich 2024 and Munich 2026, following Seoul 2026. Author credits are retained above.\nJnJ mini-series adaptations by Daniel Sabanés Bové: four-session structure, online event details, and completed live demos. Demo downloads use their included MIT license. Full attribution and exceptions.\nReuse requires creator attribution, source and license links, and an indication of changes.\n\n\n\nGood Software Engineering Practice for R Packages - Home | Slides | License"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#typical-work-steps",
+    "href": "slides/02_workflow_tests.html#typical-work-steps",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Typical work steps",
+    "text": "Typical work steps\n\n\n\n\nIdea\nConcept creation\nValidation planning\nSpecification:\n\nUser Requirements Spec (URS),\nFunctional Spec (FS), and\nSoftware Design Spec (SDS)\n\n\n\n\nR package programming\nDocumented verification\nCompletion of formal validation\nR package release\nUse in production\nMaintenance"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#frequently-used-workflow-in-practice",
+    "href": "slides/02_workflow_tests.html#frequently-used-workflow-in-practice",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Frequently Used Workflow in Practice",
+    "text": "Frequently Used Workflow in Practice\n\n\n\n\nIdea\nR package programming\nUse in production\nBug fixing\nUse in production\n\n\n\nBug fixing + Documentation\nUse in production\nBug fixing + Further development\nUse in production\nBug fixing + …\n\n\n\n\n\n Bad practice!\n\n\n Why?"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#why-practice-good-engineering-1",
+    "href": "slides/02_workflow_tests.html#why-practice-good-engineering-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Why practice good engineering?",
+    "text": "Why practice good engineering?\n\n\nOrigin of errors in system development\n\nBoehm, B. (1981). Software Engineering Economics. Prentice Hall."
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#why-practice-good-engineering-2",
+    "href": "slides/02_workflow_tests.html#why-practice-good-engineering-2",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Why practice good engineering?",
+    "text": "Why practice good engineering?\n\n\n\nDon’t waste time on maintenance\nBe faster with release on CRAN\nDon’t waste time with inefficient and buggy further development\n\n\n\nFulfill regulatory requirements1\nSave refactoring time when the Proof-of-Concept (PoC) becomes the release version\nYou don’t have to be shy any longer about inviting other developers to contribute to the package on GitHub\n\n\n\nSee also Ensuring Quality"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#why-practice-good-engineering-3",
+    "href": "slides/02_workflow_tests.html#why-practice-good-engineering-3",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Why practice good engineering?",
+    "text": "Why practice good engineering?\nInvest time in\n\nrequirements analysis,\nsoftware design, and\narchitecture…\n\n\n… but in many cases the workflow must be workable for a single developer or a small team."
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-1-idea",
+    "href": "slides/02_workflow_tests.html#example---step-1-idea",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 1: Idea",
+    "text": "Example - Step 1: Idea\nLet’s assume that you used some lines of code to create simulated data in multiple projects:\n\ndat &lt;- data.frame(\n    group = c(rep(1, 50), rep(2, 50)),\n    values = c(\n        rnorm(n = 50, mean = 8, sd = 12),\n        rnorm(n = 50, mean = 14, sd = 11)\n    )\n)\n\nIdea: put the code into a package"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-2-design-docs",
+    "href": "slides/02_workflow_tests.html#example---step-2-design-docs",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 2: Design docs",
+    "text": "Example - Step 2: Design docs\n\nDescribe the purpose and scope of the package\nAnalyse and describe the requirements in clear and simple terms (“prose”)\n\n\n\n\nObligation level\nKey word1\nDescription\n\n\n\n\nDuty\nmust, shall\n“must have”\n\n\nDesire\nshould\n“nice to have”\n\n\nIntention\nmay\n“optional”\n\n\n\nRupp, C., & SOPHISTen, die. (2009). Requirements-Engineering und -Management: Professionelle, iterative Anforderungsanalyse für die Praxis (5. Ed.). Carl Hanser Verlag GmbH & Co. KG. See also: plainlanguage.gov"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-2-design-docs-1",
+    "href": "slides/02_workflow_tests.html#example---step-2-design-docs-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 2: Design docs",
+    "text": "Example - Step 2: Design docs\nPurpose and Scope\nThe R package simulatr shall enable the creation of reproducible fake data.\nPackage Requirements\nsimulatr shall provide a function to generate normal distributed random data for two independent groups. The function must allow flexible definition of sample size per group, mean per group, standard deviation per group. The reproducibility of the simulated data must be ensured via an optional seed. It should be possible to print the function result. The package may also facilitate graphical presentation of the simulated data."
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-2-design-docs-2",
+    "href": "slides/02_workflow_tests.html#example---step-2-design-docs-2",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 2: Design docs",
+    "text": "Example - Step 2: Design docs\n\n\nUseful formats / tools for design docs:\n\nR Markdown1 (*.Rmd)\nQuarto1 (*.qmd)\nOverleaf2\ndraw.io3\n\n\n\nUML Diagram\n\n\n\n\n\n\n\n\nBased on Markdown, the easy-to-use markup languageThe easy to use, online, collaborative LaTeX editorA picture is worth a thousand words"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-3-packaging",
+    "href": "slides/02_workflow_tests.html#example---step-3-packaging",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 3: Packaging",
+    "text": "Example - Step 3: Packaging\nR package programming\n\nCreate basic package project (see R Packages)\nC&P existing R scripts (one-off scripts, prototype functions) and refactor1 it if necessary\nCreate R generic functions\nDocument all functions\n\nSee also Ensuring Quality"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-3-packaging-1",
+    "href": "slides/02_workflow_tests.html#example---step-3-packaging-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 3: Packaging",
+    "text": "Example - Step 3: Packaging\nOne-off script as starting point:\n\nsim.data &lt;- function(n1, n2, m1, m2, s1, s2) {\n    data.frame(\n        group = c(rep(1, n1), rep(2, n2)),\n        values = c(\n            rnorm(n = n1, mean = m1, sd = s1),\n            rnorm(n = n2, mean = m2, sd = s2)\n        )\n    )\n}"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-3-packaging-2",
+    "href": "slides/02_workflow_tests.html#example---step-3-packaging-2",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 3: Packaging",
+    "text": "Example - Step 3: Packaging\nRefactored script:\n\ngetSimulatedTwoArmMeans &lt;- function(n1, n2, mean1, mean2, sd1, sd2) {\n    data.frame(\n        group = c(rep(1, n1), rep(2, n2)),\n        values = c(\n            rnorm(n = n1, mean = mean1, sd = sd1),\n            rnorm(n = n2, mean = mean2, sd = sd2)\n        )\n    )\n}\n\nAlmost all functions, arguments, and objects should be self-explanatory due to their names."
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-3-packaging-3",
+    "href": "slides/02_workflow_tests.html#example---step-3-packaging-3",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 3: Packaging",
+    "text": "Example - Step 3: Packaging\nDefine that the result is a list1 which is defined as class2:\n\ngetSimulatedTwoArmMeans &lt;- function(n1, n2, mean1, mean2, sd1, sd2) {\n    result &lt;- list(n1 = n1, n2 = n2, \n         mean1 = mean1, mean2 = mean2, sd1 = sd1, sd2 = sd2)\n    result$data &lt;- data.frame(\n        group = c(rep(1, n1), rep(2, n2)),\n        values = c(\n            rnorm(n = n1, mean = mean1, sd = sd1),\n            rnorm(n = n2, mean = mean2, sd = sd2)\n        )\n    )\n    # set the class attribute\n    result &lt;- structure(result, class = \"SimulationResult\")\n    return(result)\n}\n\nIt’s common practice to add the function arguments to the result \\(\\rightarrow\\) should be a list or classTo implement generics, the result must be a class"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-3-packaging-4",
+    "href": "slides/02_workflow_tests.html#example---step-3-packaging-4",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 3: Packaging",
+    "text": "Example - Step 3: Packaging\nThe output is impractical, e.g., we need to scroll down:\n\nx &lt;- getSimulatedTwoArmMeans(n1 = 50, n2 = 50, mean1 = 5, mean2 = 7, sd1 = 3, sd2 = 4)\nx\n\n$n1\n[1] 50\n\n$n2\n[1] 50\n\n$mean1\n[1] 5\n\n$mean2\n[1] 7\n\n$sd1\n[1] 3\n\n$sd2\n[1] 4\n\n$data\n    group      values\n1       1  4.97245727\n2       1  3.87907599\n3       1  2.76905411\n4       1  6.71350329\n5       1  7.97181877\n6       1  6.73185171\n7       1  1.08633673\n8       1 11.29188689\n9       1  8.96733201\n10      1  7.50010418\n11      1  1.64836388\n12      1  4.69318093\n13      1  7.05463780\n14      1  4.89061767\n15      1  2.28115722\n16      1  8.19868297\n17      1  2.81054722\n18      1  3.46978594\n19      1  6.11457976\n20      1 10.69412500\n21      1  4.56105790\n22      1  2.86429896\n23      1  9.03992672\n24      1  6.09651121\n25      1  6.98906580\n26      1  7.79977444\n27      1  6.27178402\n28      1  6.92762054\n29      1  1.36579920\n30      1  2.19148740\n31      1  5.26456418\n32      1  5.58781413\n33      1  2.06277534\n34      1  2.30054209\n35      1  1.01006792\n36      1 -0.39877959\n37      1  4.88817675\n38      1  8.68983030\n39      1  8.57714899\n40      1  0.03243504\n41      1  4.14358475\n42      1  8.25789787\n43      1 10.51396538\n44      1  6.10543788\n45      1  5.73644997\n46      1  3.23149934\n47      1  3.29125599\n48      1  3.23385432\n49      1  3.74663439\n50      1  8.56012782\n51      2  2.82487262\n52      2  4.20559316\n53      2  3.90980643\n54      2  2.87116675\n55      2  1.13713133\n56      2  9.23171191\n57      2 -1.62699306\n58      2  9.69162035\n59      2  5.36595980\n60      2  0.86972489\n61      2  4.24630937\n62      2  4.83526734\n63      2 10.94400431\n64      2  5.48831091\n65      2 12.06725428\n66      2  5.52243534\n67      2  3.61370593\n68      2  4.53308914\n69      2  7.47668901\n70      2 13.42720109\n71      2 -0.47189009\n72      2  8.63287705\n73      2  2.33751370\n74      2  7.74163400\n75      2  8.71937738\n76      2  0.52742049\n77      2 11.55839132\n78      2  9.18243324\n79      2  6.91532062\n80      2  3.46511703\n81      2  6.88311537\n82      2  6.67018754\n83      2 10.05264443\n84      2  5.64619277\n85      2  9.42166397\n86      2  4.58578007\n87      2  5.24266327\n88      2 14.34174394\n89      2  9.68221078\n90      2  8.43085058\n91      2  5.37993485\n92      2  9.92805222\n93      2 -0.24340750\n94      2  0.91430055\n95      2  8.89090592\n96      2  6.10483189\n97      2 -1.91332898\n98      2 13.25010456\n99      2  6.32730215\n100     2  9.59176591\n\nattr(,\"class\")\n[1] \"SimulationResult\"\n\n\n\nSolution: implement generic function print"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example---step-3-packaging-5",
+    "href": "slides/02_workflow_tests.html#example---step-3-packaging-5",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example - Step 3: Packaging",
+    "text": "Example - Step 3: Packaging\nGeneric function print:\n\nCodeRoxygenOutput\n\n\n\nprint.SimulationResult &lt;- function(x, ...) {\n    args &lt;- list(n1 = x$n1, n2 = x$n2, \n        mean1 = x$mean1, mean2 = x$mean2, sd1 = x$sd1, sd2 = x$sd2)\n    \n    print(list(\n        args = format(args), \n        data = dplyr::tibble(x$data)\n    ), ...)\n}\nx\n\n\n\n\n#' @title\n#' Print Simulation Result\n#'\n#' @description\n#' Generic function to print a `SimulationResult` object.\n#'\n#' @param x a \\code{SimulationResult} object to print.\n#' @param ... further arguments passed to or from other methods.\n#' \n#' @examples\n#' x &lt;- getSimulatedTwoArmMeans(n1 = 50, n2 = 50, mean1 = 5, \n#'      mean2 = 7, sd1 = 3, sd2 = 4, seed = 123)\n#' print(x)\n#'\n#' @export\n\n\n\n\n\n$args\n   n1    n2 mean1 mean2   sd1   sd2 \n \"50\"  \"50\"   \"5\"   \"7\"   \"3\"   \"4\" \n\n$data\n# A tibble: 100 × 2\n   group values\n   &lt;dbl&gt;  &lt;dbl&gt;\n 1     1   4.97\n 2     1   3.88\n 3     1   2.77\n 4     1   6.71\n 5     1   7.97\n 6     1   6.73\n 7     1   1.09\n 8     1  11.3 \n 9     1   8.97\n10     1   7.50\n# ℹ 90 more rows"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#why-is-clean-code-important",
+    "href": "slides/02_workflow_tests.html#why-is-clean-code-important",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Why is clean code important?",
+    "text": "Why is clean code important?\n\nMaintainability: The code is readable and understandable and has a reduced complexity, i.e., it’s easier to fix bugs\nExtensibility: The architecture is simpler, cleaner, and more expressive, i.e., it’s easier to extend the capabilities and the risk of introducing bugs is reduced\nPerformance: The code often runs faster, uses less memory, or is easier to optimize"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-clean-code-rules---step-by-step",
+    "href": "slides/02_workflow_tests.html#example-clean-code-rules---step-by-step",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: clean code rules - step by step",
+    "text": "Example: clean code rules - step by step\nThis script breaks all common clean code rules:\n\n# fmt: skip\ny=function(x){\n  s1=0\n  for(v1 in x){s1=s1+v1}\n  m1=s1/length(x)\n  i=ceiling(length(x)/2)\n  if(length(x) %% 2 == 0){i=c(i,i+1)}\n  s2=0\n  for(v2 in i){s2=s2+x[v2]}\n  m2=s2/length(i)\n  c(m1,m2)\n}\ny(c(1:7, 100))\n\n[1] 16.0  4.5\n\n\n\nWe now refactor it by applying clean code rules…"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr1",
+    "href": "slides/02_workflow_tests.html#example-ccr1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#1",
+    "text": "Example: CCR#1\n\n\n\n# fmt: skip\ny=function(x){\n  s1=0\n  for(v1 in x){s1=s1+v1}\n  m1=s1/length(x)\n  i=ceiling(length(x)/2)\n  if(length(x) %% 2 == 0){i=c(i,i+1)}\n  s2=0\n  for(v2 in i){s2=s2+x[v2]}\n  m2=s2/length(i)\n  c(m1,m2)\n}\ny(c(1:7, 100))\n\n[1] 16.0  4.5\n\n\n\nCCR#1 Naming: Are the names of the variables, functions, and classes descriptive and meaningful?"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr1-1",
+    "href": "slides/02_workflow_tests.html#example-ccr1-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#1",
+    "text": "Example: CCR#1\n\n# fmt: skip\ngetMeanAndMedian=function(x){\n    sum1=0\n    for(value in x){sum1=sum1+value}\n    meanValue=sum1/length(x)\n    centerIndices=ceiling(length(x)/2)\n    if(length(x) %% 2 == 0){\n        centerIndices=c(centerIndices,centerIndices+1)\n    }\n    sum2=0\n    for(centerIndex in centerIndices){sum2=sum2+x[centerIndex]}\n    medianValue=sum2/length(centerIndices)\n    c(meanValue,medianValue)\n}\n\nCCR#1 Naming \nCCR#2 Formatting: Are indentation, spacing, and bracketing consistent, i.e., is the code easy to read"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr2",
+    "href": "slides/02_workflow_tests.html#example-ccr2",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#2",
+    "text": "Example: CCR#2\n\n\n\ngetMeanAndMedian &lt;- function(x) {\n    sum1 &lt;- 0\n    for (value in x) {\n        sum1 &lt;- sum1 + value\n    }\n    meanValue &lt;- sum1 / length(x)\n    centerIndices &lt;- ceiling(length(x) / 2)\n    if (length(x) %% 2 == 0) {\n        centerIndices &lt;- c(\n          centerIndices, centerIndices + 1)\n    }\n    sum2 &lt;- 0\n    for (centerIndex in centerIndices) {\n        sum2 &lt;- sum2 + x[centerIndex]\n    }\n    medianValue &lt;- sum2 / length(centerIndices)\n    c(meanValue, medianValue)\n}\n\n\nCCR#2 Formatting \nCCR#3 Simplicity: Did you keep the code as simple and straightforward as possible, i.e., did you avoid unnecessary complexity"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr3",
+    "href": "slides/02_workflow_tests.html#example-ccr3",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#3",
+    "text": "Example: CCR#3\nNote:\n\nFrom the Simplicity rule also follows that large source files should be split into multiple files\nGeneral guideline: keeping the number of lines to less than 1,000 lines per file can help maintain code readability and manageability"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr3-1",
+    "href": "slides/02_workflow_tests.html#example-ccr3-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#3",
+    "text": "Example: CCR#3\n\ngetMeanAndMedian &lt;- function(x) {\n    meanValue &lt;- sum(x) / length(x)\n    centerIndices &lt;- ceiling(length(x) / 2)\n    if (length(x) %% 2 == 0) {\n        centerIndices &lt;- c(centerIndices, centerIndices + 1)\n    }\n    medianValue &lt;- sum(x[centerIndices]) / length(centerIndices)\n    c(meanValue, medianValue)\n}\n\nCCR#3 Simplicity \nCCR#4 Single Responsibility Principle (SRP): does each function have only a single, well-defined purpose"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr4",
+    "href": "slides/02_workflow_tests.html#example-ccr4",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#4",
+    "text": "Example: CCR#4\n\ngetMean &lt;- function(x) {\n    sum(x) / length(x)\n}\n\nisLengthAnEvenNumber &lt;- function(x) {\n    length(x) %% 2 == 0\n}\n\ngetMedian &lt;- function(x) {\n    centerIndices &lt;- ceiling(length(x) / 2)\n    if (isLengthAnEvenNumber(x)) {\n        centerIndices &lt;- c(centerIndices, centerIndices + 1)\n    }\n    sum(x[centerIndices]) / length(centerIndices)\n}\n\nCCR#4 Single Responsibility Principle (SRP) \nCCR#5 Don’t Repeat Yourself (DRY): Did you avoid duplication of code, either by reusing existing code or creating functions"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr5",
+    "href": "slides/02_workflow_tests.html#example-ccr5",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#5",
+    "text": "Example: CCR#5\n\nCCR#5: DRY\n\nSuppose you have a code block that performs the same calculation multiple times:\n\nresult1 &lt;- 2 * 3 + 4\nresult2 &lt;- 2 * 5 + 4\nresult3 &lt;- 2 * 7 + 4\n\nCreate a function to encapsulate this calculation and reuse it multiple times:\n\ncalculate &lt;- function(x) {\n  2 * x + 4\n}\n\nresult1 &lt;- calculate(3)\nresult2 &lt;- calculate(5)\nresult3 &lt;- calculate(7)"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr5-1",
+    "href": "slides/02_workflow_tests.html#example-ccr5-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#5",
+    "text": "Example: CCR#5\n\ngetMean &lt;- function(x) {\n    sum(x) / length(x)\n}\n\nisLengthAnEvenNumber &lt;- function(x) {\n    length(x) %% 2 == 0\n}\n\ngetMedian &lt;- function(x) {\n    centerIndices &lt;- ceiling(length(x) / 2)\n    if (isLengthAnEvenNumber(x)) {\n        centerIndices &lt;- c(centerIndices, centerIndices + 1)\n    }\n    getMean(x[centerIndices])\n}\n\nCCR#5 Don’t Repeat Yourself (DRY) \nCCR#6 Comments: Did you use comments to explain the purpose of code blocks and to clarify complex logic"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr6",
+    "href": "slides/02_workflow_tests.html#example-ccr6",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#6",
+    "text": "Example: CCR#6\n\n\n\n# returns the mean of x\ngetMean &lt;- function(x) {\n    sum(x) / length(x)\n}\n\n# returns TRUE if the length of x is\n# an even number; FALSE otherwise\nisLengthAnEvenNumber &lt;- function(x) {\n    length(x) %% 2 == 0\n}\n\n# returns the median of x\ngetMedian &lt;- function(x) {\n    centerIndices &lt;- ceiling(length(x) / 2)\n    if (isLengthAnEvenNumber(x)) {\n        centerIndices &lt;- c(centerIndices,\n             centerIndices + 1)\n    }\n    getMean(x[centerIndices])\n}\n\n\nCCR#6 Comments \nCCR#7 Error Handling: Did you include error handling code to gracefully handle exceptions and unexpected situations \n\ngetMean(c(\"a\", \"b\", \"c\"))\n\nError in sum(x) : invalid ‘type’ (character) of argument"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#example-ccr7",
+    "href": "slides/02_workflow_tests.html#example-ccr7",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Example: CCR#7",
+    "text": "Example: CCR#7\n\n#' returns the mean of x\ngetMean &lt;- function(x) {\n    checkmate::assertNumeric(x)\n    sum(x) / length(x)\n}\n#' returns TRUE if the length of x is an even number; FALSE otherwise\nisLengthAnEvenNumber &lt;- function(x) {\n    checkmate::assertVector(x)\n    length(x) %% 2 == 0\n}\n#' returns the median of x\ngetMedian &lt;- function(x) {\n    checkmate::assertNumeric(x)\n    centerIndices &lt;- ceiling(length(x) / 2)\n    if (isLengthAnEvenNumber(x)) {\n        centerIndices &lt;- c(centerIndices, centerIndices + 1)\n    }\n    getMean(x[centerIndices])\n}\n\nCCR#7 Error Handling"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#summary-of-clean-code-rules",
+    "href": "slides/02_workflow_tests.html#summary-of-clean-code-rules",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Summary of clean code rules",
+    "text": "Summary of clean code rules\n\nNaming: Use descriptive and meaningful names for variables, functions, and classes\nFormatting: Adhere to consistent indentation, spacing, and bracketing to make the code easy to read\nSimplicity: Keep the code as simple and straightforward as possible, avoiding unnecessary complexity\nSingle Responsibility Principle (SRP): Each function should have a single, well-defined purpose\nDon’t Repeat Yourself (DRY): Avoid duplication of code, either by reusing existing code or creating functions"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#summary-of-clean-code-rules-1",
+    "href": "slides/02_workflow_tests.html#summary-of-clean-code-rules-1",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Summary of clean code rules",
+    "text": "Summary of clean code rules\n\nComments: Use comments to explain the purpose of code blocks and to clarify complex logic\nError Handling: Include error handling code to gracefully handle exceptions and unexpected situations\n Test-Driven Development (TDD): Write tests for your code to ensure it behaves as expected and to catch bugs early\nRefactoring: Regularly refactor your code to keep it clean, readable, and maintainable\n Code Review: Have other team members review your code to catch potential issues and improve its quality"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#how-to-apply-clean-code-rules",
+    "href": "slides/02_workflow_tests.html#how-to-apply-clean-code-rules",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "How to apply clean code rules?",
+    "text": "How to apply clean code rules?\nRecommended quality workflow for R packages:\n\nFollow the naming and styling guidelines (#1, #2)\nContinuously write tests and optimize the code coverage with help of tools (#7, #8)\nDocument the package and functions (#6)\nRegularly refactor your code (#1 - #7, #9)\nPublish your code on GitHub and invite colleagues to contribute (#10)"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#verification-vs-validation",
+    "href": "slides/02_workflow_tests.html#verification-vs-validation",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Verification vs validation",
+    "text": "Verification vs validation\n\n\nVerification:\nAre we building the product right?\n\nThe product meets a set of specified requirements\nActivities: reviews, inspections, and testing\nGoal: ensure that the product has been designed and implemented correctly\n\n\nValidation:\nAre we building the right product?\n\nEvaluate the product during or at the end of the development process\nShow that the product meet the specified requirements\nGoal: confirm that the product is fit for its intended purpose\n\\(\\rightarrow\\) Refers back to the user’s needs"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#what-are-unit-tests",
+    "href": "slides/02_workflow_tests.html#what-are-unit-tests",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "What are unit tests?",
+    "text": "What are unit tests?\n\nAutomated tests\nRecord the expected output of a function using code\nCheck individual units of code (functions or methods) for correctness\nTypically written by developers as part of the software development process\nTypically run automatically as part of a CI/CD pipeline\nCan be run before committing code changes"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#why-are-unit-tests-important",
+    "href": "slides/02_workflow_tests.html#why-are-unit-tests-important",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Why are unit tests important?",
+    "text": "Why are unit tests important?\n\nCCR#8: TDD\n\n\nHelp to ensure that individual units of code are working correctly\nEnsure that changes to the codebase do not break existing functionality\nExpress the desired behavior in a way that a human can understand\nHelp to identify and fix bugs early on in the development process\nSave time and resources by catching issues before they become more difficult and costly to fix\n\n\n\n\n\n\nUnit tests help to increase the reliability and maintainability of the code"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#what-other-important-test-types-exist",
+    "href": "slides/02_workflow_tests.html#what-other-important-test-types-exist",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "What other important test types exist?",
+    "text": "What other important test types exist?\n\nIntegration Testing: Test if different functions or scripts work together as expected\nPerformance Testing: Analyze the performance of the implemented functions and check whether they meet the requirements (UR/UX)\nSnapshot Testing: Record the results in a separate human-readable file and compare it to the output during the test; useful for large/complex outputs and binary formats like plots"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#how-to-realize-testing-with-r",
+    "href": "slides/02_workflow_tests.html#how-to-realize-testing-with-r",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "How to realize testing with R?",
+    "text": "How to realize testing with R?\nR package testthat\n\nPopular testing framework for R that is easy to learn and use\nUnit testing, integration testing, and snapshot testing supported\nAlso performance testing, e.g., with help of microbenchmark package\n\nExample: unit test passed\n\nlibrary(testthat)\nexpect_equal(getMean(c(1, 3, 2)), 2)\n\nExample: unit test failed\n\nexpect_equal(getMean(c(1, 3, 2, NA)), 2)\nexpect_equal(getMedian(c(1, 3, 2)), 2)\n\n\nError: getMean(c(1, 3, 2, NA)) not equal to 2. Error: getMedian(c(1, 3, 2)) not equal to 2."
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#investigating-failed-tests",
+    "href": "slides/02_workflow_tests.html#investigating-failed-tests",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Investigating failed tests",
+    "text": "Investigating failed tests\n\n#' returns the mean of x\ngetMean &lt;- function(x, na.rm = TRUE) {\n    checkmate::assertNumeric(x)\n    sum(x, na.rm = na.rm) / length(x[!is.na(x)])\n}\n#' returns TRUE if the length of x is an even number; FALSE otherwise\nisLengthAnEvenNumber &lt;- function(x) {\n    checkmate::assertVector(x)\n    length(x[!is.na(x)]) %% 2 == 0\n}\n#' returns the median of x\ngetMedian &lt;- function(x, na.rm = TRUE) {\n    checkmate::assertNumeric(x)\n    centerIndices &lt;- ceiling(length(x[!is.na(x)]) / 2)\n    if (anyNA(x) & !na.rm){\n        centerIndices &lt;- NA_real_\n    } else if (isLengthAnEvenNumber(x)) {\n        centerIndices &lt;- c(centerIndices, centerIndices + 1)\n    }\n    getMean(sort(x)[centerIndices])\n}"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#re-evaluate-tests",
+    "href": "slides/02_workflow_tests.html#re-evaluate-tests",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Re-evaluate tests",
+    "text": "Re-evaluate tests\n\nexpect_equal(getMedian(c(1, 3, 2)), 2)\nexpect_equal(getMedian(c(1, 3, 2, NA), na.rm = FALSE), NA_real_)\nexpect_equal(getMean(c(1, 3, 2, NA)), 2)\nexpect_equal(getMean(c(1, 3, 2, NA), na.rm = FALSE), NA_real_)"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#why-is-code-style-important",
+    "href": "slides/02_workflow_tests.html#why-is-code-style-important",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Why is code style important?",
+    "text": "Why is code style important?\n\nCCR#2: Formatting\n\n\nMake the code more readable, maintainable, and consistent\nMake it easier for others to understand and contribute to the codebase\nAdhering to a consistent code style can reduce the number of errors and make debugging simpler\n“Good coding style is like correct punctuation: you can manage without it, butitsuremakesthingseasiertoread.” (The tidyverse style guide)"
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#how-to-optimize-the-code-styling",
+    "href": "slides/02_workflow_tests.html#how-to-optimize-the-code-styling",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "How to optimize the code styling?",
+    "text": "How to optimize the code styling?\nTwo popular R packages support the tidyverse style guide:\n\nstyler: interactively restyle selected text, files, or entire projects:\n\nstyle_text\nstyle_file\nstyle_pkg\n\nlintr: perform automated checks to confirm that you conform to the style guide\nair : an R formatter that ensures whitespace, newlines, punctuation conform to a set of rules and standards\n\nThe devtools function spell_check runs a spell check on text fields in the package description file, manual pages, and optionally vignettes."
+  },
+  {
+    "objectID": "slides/02_workflow_tests.html#code-styler-in-rstudio",
+    "href": "slides/02_workflow_tests.html#code-styler-in-rstudio",
+    "title": "2. Workflow, clean code and unit tests",
+    "section": "Code styler in RStudio",
+    "text": "Code styler in RStudio\nHow to link the styler1 package to a keyboard shortcut:\n\nBrowse addinsSet keyboard shortcut\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nIf not available, install it first"
+  },
+  {
+    "objectID": "ATTRIBUTION.html",
+    "href": "ATTRIBUTION.html",
+    "title": "Attribution and changes for Zurich 2026",
+    "section": "",
+    "text": "Unless separately credited, the course materials are licensed under Creative Commons Attribution-ShareAlike 4.0 International. Author lists, including original and later contributors, are retained in the individual slide chapters.\nThe Zurich 2026 revision by Daniel Sabanés Bové builds on:\n\nZurich 2024, the original fork underlying this repository.\nMunich 2026, the source of updated introduction, R packages, package quality, collaboration, publication, and conclusion sections, and their referenced images and keyboard-shortcut table.\nMunich’s preceding Seoul 2026 revision and the earlier Montreal course, as recorded in the source history.\n\n\n\nDaniel Sabanés Bové reorganized the Zurich 2026 materials into four online sessions: R package structure and building; workflow, clean code and unit tests; more tests and Shiny development; optimization and AI best practices. Classroom exercises were replaced with completed live demonstrations. The standalone introduction, collaboration, publication, and conclusion chapters were removed, along with old exercise/solution downloads. Dates, venue, navigation, and source links were updated for this repository. A lengthy external AI application example was removed. Original author credits are retained in each adapted chapter section.\nNew examples and demo notes under sessions/, including their copies in the four session ZIPs, are MIT licensed, copyright 2026 Daniel Sabanés Bové. These are new implementations, not relicensed copies of the previous simulatr archive. The older examples still referenced by slides retain their original licenses. The root CC BY-SA license applies to adapted teaching materials, not files with an explicit separate license.\n\n\n\nslides/resources/ai-graphic.webp was supplied by the course organizer and is credited to Pierre DeBois, “AI Made R Packages Easy to Write. But Did It Make Packages in CRAN Better?”, DataDrivenInvestor, 23 September 2026. It is excluded from the course’s CC BY-SA license; no additional reuse license is asserted. Credit appears beside the graphic and in the AI chapter’s license slide. Other images retain their existing on-slide credits. Example software retains the licenses shipped in its directories."
+  },
+  {
+    "objectID": "ATTRIBUTION.html#jnj-mini-series-adaptation-november-2026",
+    "href": "ATTRIBUTION.html#jnj-mini-series-adaptation-november-2026",
+    "title": "Attribution and changes for Zurich 2026",
+    "section": "",
+    "text": "Daniel Sabanés Bové reorganized the Zurich 2026 materials into four online sessions: R package structure and building; workflow, clean code and unit tests; more tests and Shiny development; optimization and AI best practices. Classroom exercises were replaced with completed live demonstrations. The standalone introduction, collaboration, publication, and conclusion chapters were removed, along with old exercise/solution downloads. Dates, venue, navigation, and source links were updated for this repository. A lengthy external AI application example was removed. Original author credits are retained in each adapted chapter section.\nNew examples and demo notes under sessions/, including their copies in the four session ZIPs, are MIT licensed, copyright 2026 Daniel Sabanés Bové. These are new implementations, not relicensed copies of the previous simulatr archive. The older examples still referenced by slides retain their original licenses. The root CC BY-SA license applies to adapted teaching materials, not files with an explicit separate license."
+  },
+  {
+    "objectID": "ATTRIBUTION.html#third-party-graphic",
+    "href": "ATTRIBUTION.html#third-party-graphic",
+    "title": "Attribution and changes for Zurich 2026",
+    "section": "",
+    "text": "slides/resources/ai-graphic.webp was supplied by the course organizer and is credited to Pierre DeBois, “AI Made R Packages Easy to Write. But Did It Make Packages in CRAN Better?”, DataDrivenInvestor, 23 September 2026. It is excluded from the course’s CC BY-SA license; no additional reuse license is asserted. Credit appears beside the graphic and in the AI chapter’s license slide. Other images retain their existing on-slide credits. Example software retains the licenses shipped in its directories."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Good Software Engineering Practice for R Packages",
+    "section": "",
+    "text": "A four-session mini-series for JnJ (online), taught in English by Daniel Sabanés Bové. Learn how to build reliable R packages through presentations and live demos. Participants can execute the completed examples on their own laptop alongside the instructor."
+  },
+  {
+    "objectID": "index.html#sessions-and-downloads",
+    "href": "index.html#sessions-and-downloads",
+    "title": "Good Software Engineering Practice for R Packages",
+    "section": "Sessions and downloads",
+    "text": "Sessions and downloads\n\n\n\nSession\nDate\nSlides\nComplete demo code\n\n\n\n\n1. R package structure and building it\n19 November 2026\nSlides\nSession 1 ZIP\n\n\n2. Workflow, clean code and unit tests\n20 November 2026\nSlides\nSession 2 ZIP\n\n\n3. More on tests and Shiny development\nTBD\nSlides\nSession 3 ZIP\n\n\n4. Code optimization and AI best practices\nTBD\nSlides\nSession 4 ZIP\n\n\n\nSession times and the dates for sessions 3 and 4 are to be confirmed."
+  },
+  {
+    "objectID": "index.html#before-joining",
+    "href": "index.html#before-joining",
+    "title": "Good Software Engineering Practice for R Packages",
+    "section": "Before joining",
+    "text": "Before joining\nExperience writing R functions is recommended. Install R and RStudio. For session 1, install Rtools on Windows or the macOS build tools as appropriate.\nDownload and extract the ZIP for your session to a writable folder. Open the included .Rproj file and run source(\"setup.R\") once before joining. This installs only the packages needed for that demo and requires internet access. Then run source(\"demo.R\"), or execute its sections alongside the instructor. For session 3, source(\"launch-app.R\") opens the Shiny app; stop it with Escape in RStudio or Ctrl+C in a terminal.\nEach download is self-contained, with completed code, synthetic data generated locally, a README, and its license. No code from a previous session is required. Session 4 includes an optimization demo; AI best practices are covered in the slides."
+  },
+  {
+    "objectID": "index.html#further-reading",
+    "href": "index.html#further-reading",
+    "title": "Good Software Engineering Practice for R Packages",
+    "section": "Further reading",
+    "text": "Further reading\n\nR Packages (2e)\nWriting R Extensions\nTidy design principles"
+  },
+  {
+    "objectID": "index.html#credits-and-license",
+    "href": "index.html#credits-and-license",
+    "title": "Good Software Engineering Practice for R Packages",
+    "section": "Credits and license",
+    "text": "Credits and license\nAdapted slide materials are licensed under CC BY-SA 4.0, unless separately credited. Original and subsequent author credits remain in the slides. New self-contained demo code and notes in sessions/ use the MIT license included in each download. Legacy slide examples retain their shipped licenses. The AI chapter’s third-party graphic is excluded from the course license. See attribution and changes for source history and exceptions."
+  },
+  {
+    "objectID": "listing.html",
+    "href": "listing.html",
+    "title": "Slides",
+    "section": "",
+    "text": ":::{#quarto-listing-pipeline .hidden} \\(e = mC^2\\)\n:::{.hidden render-id=“pipeline-listing-listing”}\n:::{.list .quarto-listing-default}\n\n\n  \n\n\n\n\n\nR package structure and building it\n\n\nMini-series: Good Software Engineering Practice for R Packages\n\n\nJnJ (online) — 2026-11-19\n\n\n\n\n\n\nNov 19, 2026\n\n\nDaniel Sabanés Bové\n\n\n\n\n\n\n  \n\n\n\n\n\nWorkflow, clean code and unit tests\n\n\nMini-series: Good Software Engineering Practice for R Packages\n\n\nJnJ (online) — 2026-11-20\n\n\n\n\n\n\nNov 20, 2026\n\n\nDaniel Sabanés Bové\n\n\n\n\n\n\n  \n\n\n\n\n\nMore on tests and Shiny development\n\n\nMini-series: Good Software Engineering Practice for R Packages\n\n\nJnJ (online) — Date TBD\n\n\n\n\n\n\nDaniel Sabanés Bové\n\n\n\n\n\n\n  \n\n\n\n\n\nCode optimization and AI best practices\n\n\nMini-series: Good Software Engineering Practice for R Packages\n\n\nJnJ (online) — Date TBD\n\n\n\n\n\n\nDaniel Sabanés Bové\n\n\n\n\n:::\n\n\n\n\n\nNo matching items\n\n:::\n:::"
+  },
+  {
+    "objectID": "slides/01_packages.html#what-you-know-already",
+    "href": "slides/01_packages.html#what-you-know-already",
+    "title": "1. R package structure and building it",
+    "section": "What you know already",
+    "text": "What you know already\n\nPackages provide a mechanism for loading optional code, data, and documentation\nA library is a directory into which packages are installed\ninstall.packages() is used to install packages into the library\nlibrary() is used to load and attach packages from the library\n\n“Attach” means that the package is put in your search list — objects in the package can be used directly\n\nRemember that package \\(\\neq\\) library"
+  },
+  {
+    "objectID": "slides/01_packages.html#what-we-want-to-talk-about-now",
+    "href": "slides/01_packages.html#what-we-want-to-talk-about-now",
+    "title": "1. R package structure and building it",
+    "section": "What we want to talk about now",
+    "text": "What we want to talk about now\n\nHow to write, build, test, and check your own package 😊\nHow to do this in a methodical and sustainable way\nGive tips and tricks based on practical experience"
+  },
+  {
+    "objectID": "slides/01_packages.html#how-is-a-package-structured",
+    "href": "slides/01_packages.html#how-is-a-package-structured",
+    "title": "1. R package structure and building it",
+    "section": "How is a package structured?",
+    "text": "How is a package structured?\nPackage source = directory with files and subdirectories\n\n\n\nMandatory:\n\nDESCRIPTION\nNAMESPACE\nR\nman\n\n\n\n\nTypically also includes:\n\ndata\ninst\nsrc\ntests\nvignettes\nNEWS"
+  },
+  {
+    "objectID": "slides/01_packages.html#how-to-get-started-quickly",
+    "href": "slides/01_packages.html#how-to-get-started-quickly",
+    "title": "1. R package structure and building it",
+    "section": "How to get started quickly",
+    "text": "How to get started quickly\nOnce upon a time, developers would set up this structure manually 🥱\nNowadays, it’s super fast with:\n\nusethis::create_package()\nRStudio &gt; File &gt; New Project &gt; New Directory &gt; R Package"
+  },
+  {
+    "objectID": "slides/01_packages.html#description-file",
+    "href": "slides/01_packages.html#description-file",
+    "title": "1. R package structure and building it",
+    "section": "DESCRIPTION file",
+    "text": "DESCRIPTION file\n\nPackage: Choose the name of your package\n\nNot unimportant!\nCheck CRAN to see if your name is available\n\nTitle: Add a Title for Your Package (Title Case)\nVersion: Start with a low package version\n\nMajor.Minor.Patch syntax (Semantic Versioning)\n\nAuthors@R: Add authors and maintainer\nDescription: Like an abstract, including references"
+  },
+  {
+    "objectID": "slides/01_packages.html#description-file-contd",
+    "href": "slides/01_packages.html#description-file-contd",
+    "title": "1. R package structure and building it",
+    "section": "DESCRIPTION file (cont’d)",
+    "text": "DESCRIPTION file (cont’d)\n\nLicense: Important for open sourcing\n\nConsider permissive licenses such as Apache and MIT\n\nDepends:\n\nWhich R version users need to have at a minimum\nIdeally don’t put any package here\nPackages will be loaded and attached upon library your package\n\nImports: Packages which you import functions, methods, classes from\nSuggests: Packages for documentation processing (roxygen2), running examples, tests (testthat), vignettes"
+  },
+  {
+    "objectID": "slides/01_packages.html#r-folder",
+    "href": "slides/01_packages.html#r-folder",
+    "title": "1. R package structure and building it",
+    "section": "R folder",
+    "text": "R folder\n\nOnly contains R code files (recommended to use .R suffix)\n\nCan create a file with usethis::use_r(\"filename\")\n\nAssigns R objects, i.e. mostly functions, but could also be constant variables, data sets, etc.\nShould not have any side effects, i.e. avoid require(), options() etc.\nIf certain code needs to be sourced first, use on top of file (which will update the Collate field of DESCRIPTION automatically)\n\n\n#' @include dependency.R\nNULL"
+  },
+  {
+    "objectID": "slides/01_packages.html#namespace-file",
+    "href": "slides/01_packages.html#namespace-file",
+    "title": "1. R package structure and building it",
+    "section": "NAMESPACE file",
+    "text": "NAMESPACE file\n\n# Generated by roxygen2: do not edit by hand\n\nexport(package_used_first)\nexport(package_used_second)\nexport(package_used_third)\n\n\nDefines the namespace of the package, to work with R’s namespace management system\nNamespace directives in this file allow to specify:\n\nWhich objects are exported to users and other packages\nWhich are imported from other packages"
+  },
+  {
+    "objectID": "slides/01_packages.html#namespace-file-contd",
+    "href": "slides/01_packages.html#namespace-file-contd",
+    "title": "1. R package structure and building it",
+    "section": "NAMESPACE file (cont’d)",
+    "text": "NAMESPACE file (cont’d)\n\nControls the search strategy for variables:\n\nLocal (in the function body etc.)\nPackage namespace\nImports\nBase namespace\nNormal search() path"
+  },
+  {
+    "objectID": "slides/01_packages.html#man-folder",
+    "href": "slides/01_packages.html#man-folder",
+    "title": "1. R package structure and building it",
+    "section": "man folder",
+    "text": "man folder\n\nContains documentation files for the objects in the package in the .Rd format\n\nThe syntax is a bit similar to LaTeX\n\nAll user level objects should be documented\nInternal objects don’t need to be documented — but I recommend it!\nOnce upon a time, developers would set up these .Rd files and the NAMESPACE manually 🥱\nFortunately, nowadays we have roxygen2! 🚀"
+  },
+  {
+    "objectID": "slides/01_packages.html#roxygen2-to-the-rescue",
+    "href": "slides/01_packages.html#roxygen2-to-the-rescue",
+    "title": "1. R package structure and building it",
+    "section": "roxygen2 to the rescue!",
+    "text": "roxygen2 to the rescue!\n\nWe can include the documentation source directly in the R script on top of the objects we are documenting\nSyntax is composed of special comments #' and special macros preceded with @\nIn RStudio, running Build &gt; More &gt; Document will render the .Rd files and the NAMESPACE file for you\nGet started with usethis::use_roxygen_md()\nPlacing your cursor inside a function in RStudio, create a roxygen2 skeleton with Code &gt; Insert Roxygen Skeleton"
+  },
+  {
+    "objectID": "slides/01_packages.html#roxygen2-tags-function-help",
+    "href": "slides/01_packages.html#roxygen2-tags-function-help",
+    "title": "1. R package structure and building it",
+    "section": "roxygen2 tags: function help",
+    "text": "roxygen2 tags: function help\n\n\n\n\n\n\n\nTag\nPurpose\n\n\n\n\n@title, @description\nName and short explanation (also supplied by the opening text)\n\n\n@details\nLonger explanation, assumptions, and algorithm\n\n\n@param x\nMeaning, type, and constraints of an argument\n\n\n@returns / @return\nReturn value: type, shape, and meaning\n\n\n@examples\nRunnable examples\n\n\n@seealso, @family\nRelated help topics and groups of functions\n\n\n\nOfficial roxygen2 function documentation · Cross-references"
+  },
+  {
+    "objectID": "slides/01_packages.html#roxygen2-tags-reuse-and-namespace",
+    "href": "slides/01_packages.html#roxygen2-tags-reuse-and-namespace",
+    "title": "1. R package structure and building it",
+    "section": "roxygen2 tags: reuse and namespace",
+    "text": "roxygen2 tags: reuse and namespace\n\n\n\n\n\n\n\nTag\nPurpose\n\n\n\n\n@export\nExport a function or register its method\n\n\n@importFrom pkg fun\nImport selected functions; also list the dependency in DESCRIPTION\n\n\n@inheritParams fun\nReuse argument documentation\n\n\n@inherit fun\nReuse documentation sections\n\n\n@rdname topic, @describeIn topic\nCombine related functions on one help page\n\n\n@noRd\nKeep source documentation without generating an .Rd file\n\n\n@keywords internal\nKeep a help topic out of the normal index\n\n\n\nPrefer pkg::fun() for a few external calls. Regenerate with devtools::document(); edit the roxygen source, not generated files.\nOfficial namespace guide · Reusing documentation"
+  },
+  {
+    "objectID": "slides/01_packages.html#setting-up-roxygen2-in-your-project",
+    "href": "slides/01_packages.html#setting-up-roxygen2-in-your-project",
+    "title": "1. R package structure and building it",
+    "section": "Setting up roxygen2 in your project",
+    "text": "Setting up roxygen2 in your project"
+  },
+  {
+    "objectID": "slides/01_packages.html#roxygen2-source",
+    "href": "slides/01_packages.html#roxygen2-source",
+    "title": "1. R package structure and building it",
+    "section": "roxygen2 source",
+    "text": "roxygen2 source\nR/my_sum.R:\n\n#' My Summation Function\n#'\n#' This is my first function and it sums two numbers.\n#'\n#' @param x first summand.\n#' @param y second summand.\n#'\n#' @return The sum of `x` and `y`.\n#' @export\n#'\n#' @note This function is a bit boring but that is ok.\n#' @seealso [Arithmetic] for an easier way.\n#'\n#' @examples\n#' my_sum(1, 2)\nmy_sum &lt;- function(x, y) {\n    x + y\n}"
+  },
+  {
+    "objectID": "slides/01_packages.html#roxygen2-output",
+    "href": "slides/01_packages.html#roxygen2-output",
+    "title": "1. R package structure and building it",
+    "section": "roxygen2 output",
+    "text": "roxygen2 output\nman/my_sum.Rd:\n% Generated by roxygen2: do not edit by hand\n% Please edit documentation in R/my_sum.R\n\\name{my_sum}\n\\alias{my_sum}\n\\title{My Summation Function}\n\\usage{\nmy_sum(x, y)\n}\n\\arguments{\n\\item{x}{first summand.}\n\n\\item{y}{second summand.}\n}\n\\value{\nThe sum of \\code{x} and \\code{y}.\n}\n\\description{\nThis is my first function and it sums two numbers.\n}\n\\note{\nThis function is a bit boring but that is ok.\n}\n\\examples{\nmy_sum(1, 2)\n}\n\\seealso{\n\\link{Arithmetic} for an easier way.\n}"
+  },
+  {
+    "objectID": "slides/01_packages.html#roxygen2-output-contd",
+    "href": "slides/01_packages.html#roxygen2-output-contd",
+    "title": "1. R package structure and building it",
+    "section": "roxygen2 output (cont’d)",
+    "text": "roxygen2 output (cont’d)\nNAMESPACE:\n# Generated by roxygen2: do not edit by hand\n\nexport(my_sum)"
+  },
+  {
+    "objectID": "slides/01_packages.html#tests-folder",
+    "href": "slides/01_packages.html#tests-folder",
+    "title": "1. R package structure and building it",
+    "section": "tests folder",
+    "text": "tests folder\n\nWhere store the unit tests covering the functionality of the package\nGet started with usethis::use_testthat() and usethis::use_test() and populate tests/testthat folder with unit tests\nRarely, tests cannot be run within testthat framework, then these can go into R scripts directly in tests directory\nWe will look at unit tests in detail later"
+  },
+  {
+    "objectID": "slides/01_packages.html#data-folder",
+    "href": "slides/01_packages.html#data-folder",
+    "title": "1. R package structure and building it",
+    "section": "data folder",
+    "text": "data folder\n\nFor (example) data that you ship in your package to the user\n\nGet started with usethis::use_data()\nNote: Usually we use lazy data loading, therefore no data() call needed before using the data\n\nIf you generate the example data, save the R script, too\n\nPut that into data-raw folder, start with usethis::use_data_raw()"
+  },
+  {
+    "objectID": "slides/01_packages.html#inst-folder",
+    "href": "slides/01_packages.html#inst-folder",
+    "title": "1. R package structure and building it",
+    "section": "inst folder",
+    "text": "inst folder\n\nContents will be copied recursively to installation directory\n\nBe careful not to interfere with standard folder names\n\nFor data that is used by functions in the package itself\n\nThose would typically go into inst/extdata folder\nLoad with system.file(\"path/file\", package = \"mypackage\")\n\nCITATION: For custom citation() output\n\nCreate it with usethis::use_citation()\n\ninst/doc can contain documentation files (typically pdf)"
+  },
+  {
+    "objectID": "slides/01_packages.html#src-folder",
+    "href": "slides/01_packages.html#src-folder",
+    "title": "1. R package structure and building it",
+    "section": "src folder",
+    "text": "src folder\n\nContains sources and headers for any code that needs compilation\nShould only contain a single language here\n\nBecause R uses it, mixing C, C++ and Fortran usually works with OS native compilers\n\nMuch more complex to write and maintain than an R only package\nTypically only makes sense for\n\nWrapping existing libraries for use in R\nSpeeding up complex or long computations"
+  },
+  {
+    "objectID": "slides/01_packages.html#vignettes-folder",
+    "href": "slides/01_packages.html#vignettes-folder",
+    "title": "1. R package structure and building it",
+    "section": "vignettes folder",
+    "text": "vignettes folder\n\nSpecial case of documentation files (pdf or html) created by compiling source files\nPackage users don’t need to recompile the vignettes - they are delivered with the package\nStart a new vignette with usethis::use_vignette()\n\nStarts an Rmd vignette, compiled with knitr\n\nImportant for the user to understand the high-level ideas\nComplements function-level documentation from our roxygen2 chunks"
+  },
+  {
+    "objectID": "slides/01_packages.html#news-file",
+    "href": "slides/01_packages.html#news-file",
+    "title": "1. R package structure and building it",
+    "section": "NEWS file",
+    "text": "NEWS file\n\nLists user-visible changes worth mentioning\nIn each new release, add items at the top under the version they refer to\nDon’t discard old items: leave them in the file after the newer items\nStart one with usethis::use_news_md()"
+  },
+  {
+    "objectID": "slides/01_packages.html#licensing-1",
+    "href": "slides/01_packages.html#licensing-1",
+    "title": "1. R package structure and building it",
+    "section": "Licensing",
+    "text": "Licensing\n\nWe mentioned before that licensing information is usually included in the DESCRIPTION file\nIn fact, the License field (in standardized form) is mandatory\nLicensing for a package which might be distributed is an important but potentially complex subject\nIt is very important to include licensing information, as otherwise:\n\nIt may not be possible to use it\nIt may not be possible to distribute copies of it\n\nWe are going to talk more about licensing in Chapter 5 later today"
+  },
+  {
+    "objectID": "slides/01_packages.html#license-options",
+    "href": "slides/01_packages.html#license-options",
+    "title": "1. R package structure and building it",
+    "section": "License options",
+    "text": "License options\n\nCommon licenses for R packages: GPL-2, GPL-3, AGPL-3, MIT, …\nDetails and description of most licenses are available online:\n\nhttps://www.r-project.org/Licenses\nhttps://choosealicense.com\nhttps://cran.r-project.org/doc/manuals/R-exts.html#Licensing\n\nExamples of standardized license specifications:\n\nLicense: GPL-2\nLicense: LGPL (&gt;= 2.0, &lt; 3) | Mozilla Public License\nLicense: GPL-2 | file LICENCE\nLicense: Artistic-2.0 | AGPL-3 + file LICENSE\n\nThe optional file LICENSE/LICENCE contains a copy of the license\n\nOnly include such a file if it is referred to in the License field"
+  },
+  {
+    "objectID": "slides/01_packages.html#adding-a-license-to-your-package",
+    "href": "slides/01_packages.html#adding-a-license-to-your-package",
+    "title": "1. R package structure and building it",
+    "section": "Adding a license to your package",
+    "text": "Adding a license to your package\n\nOnce again, functions from the usethis package simplify this process:\n\nusethis::use_mit_license()\nusethis::use_gpl_license()\nusethis::use_agpl_license()\nusethis::use_lgpl_license()\nusethis::use_apache_license()\nusethis::use_cc0_license()\nusethis::use_ccby_license()\nusethis::use_proprietary_license()"
+  },
+  {
+    "objectID": "slides/01_packages.html#documenting-the-package",
+    "href": "slides/01_packages.html#documenting-the-package",
+    "title": "1. R package structure and building it",
+    "section": "Documenting the package",
+    "text": "Documenting the package\n\nThe first step is to produce the documentation files and NAMESPACE\nIn RStudio: Build &gt; More &gt; Document\nIn the console: devtools::document()"
+  },
+  {
+    "objectID": "slides/01_packages.html#checking-the-package",
+    "href": "slides/01_packages.html#checking-the-package",
+    "title": "1. R package structure and building it",
+    "section": "Checking the package",
+    "text": "Checking the package\n\nR comes with pre-defined check command for packages: “the R package checker” aka R CMD check\nAbout 22 checks are run (so quite a lot), including things like:\n\nCan the package be installed?\nIs the code syntax ok?\nIs the documentation complete?\nDo tests run successfully?\nDo examples run successfully?\n\nIn RStudio: Build &gt; Check\nIn the console: devtools::check()"
+  },
+  {
+    "objectID": "slides/01_packages.html#building-the-package-1",
+    "href": "slides/01_packages.html#building-the-package-1",
+    "title": "1. R package structure and building it",
+    "section": "Building the package",
+    "text": "Building the package\n\nThe R package folder can be compressed into a single package file\nTypically we manually only build “source” package\n\nIn RStudio: Build &gt; More &gt; Build Source Package\nIn the console: devtools::build()\n\nMakes it easy to share the package with others and submit to CRAN"
+  },
+  {
+    "objectID": "slides/01_packages.html#installing-the-package",
+    "href": "slides/01_packages.html#installing-the-package",
+    "title": "1. R package structure and building it",
+    "section": "Installing the package",
+    "text": "Installing the package\n\nR comes with pre-defined install command for packages: R CMD INSTALL\nIn RStudio: Build &gt; Install\nIn the console: devtools::install()\nNote: During development it’s usually sufficient to use Build &gt; More &gt; Load All\n\nRuns devtools::load_all()\nRoughly simulates what happens when package would be installed and loaded\nUnexported objects and helpers under tests will also be available\nKey: much faster!"
+  },
+  {
+    "objectID": "slides/01_packages.html#keyboard-shortcuts",
+    "href": "slides/01_packages.html#keyboard-shortcuts",
+    "title": "1. R package structure and building it",
+    "section": "Keyboard shortcuts",
+    "text": "Keyboard shortcuts\n\nLearning some of the RStudio keyboard shortcuts can speed up many of the tasks we introduced in this lecture:\n\n\n\n\n\n\nDescription\nWindows & Linux\nMac\n\n\n\n\nInstall and Restart\nCtrl+Shift+B\nShift+Command+B\n\n\nLoad All\nCtrl+Shift+L\nShift+Command+L\n\n\nTest Package\nCtrl+Shift+T\nShift+Command+T\n\n\nCheck Package\nCtrl+Shift+E\nShift+Command+E\n\n\nDocument Package\nCtrl+Shift+D\nShift+Command+D\n\n\n\n\n\n\nThere are many more – check for instance the RStudio IDE Documentation"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#testthat-comparisons-functions-12",
+    "href": "slides/03_tests_shiny.html#testthat-comparisons-functions-12",
+    "title": "3. More on tests and Shiny development",
+    "section": "testthat comparisons functions (1/2)",
+    "text": "testthat comparisons functions (1/2)\n\n\n\n\n\n\n\n\nFunction name\nDoes code…\n\n\n\n\nexpect_condition\nfulfill a condition?\n\n\nexpect_equal\nreturn the expected value?\n\n\nexpect_error\nthrow an error?\n\n\nexpect_false\nreturn ‘FALSE’?\n\n\nexpect_gt\nreturn a number greater than the expected value?\n\n\nexpect_gte\nreturn a number greater or equal than the expected value?\n\n\nexpect_identical\nreturn the expected value?\n\n\nexpect_invisible\nreturn a invisible object?\n\n\nexpect_length\nreturn a vector with the specified length?\n\n\nexpect_lt\nreturn a number less than the expected value?\n\n\nexpect_lte\nreturn a number less or equal than the expected value?\n\n\nexpect_mapequal\nreturn a vector containing the expected values?\n\n\nexpect_message\nshow a message?\n\n\nexpect_named\nreturn a vector with (given) names?"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#testthat-comparisons-functions-22",
+    "href": "slides/03_tests_shiny.html#testthat-comparisons-functions-22",
+    "title": "3. More on tests and Shiny development",
+    "section": "testthat comparisons functions (2/2)",
+    "text": "testthat comparisons functions (2/2)\n\n\n\n\n\n\n\n\nFunction name\nDoes code…\n\n\n\n\nexpect_no_condition\nrun without condition?\n\n\nexpect_no_error\nrun without error?\n\n\nexpect_no_message\nrun without message?\n\n\nexpect_no_warning\nrun without warning?\n\n\nexpect_output\nprint output to the console?\n\n\nexpect_s3_class\nreturn an object inheriting from the expected S3 class?\n\n\nexpect_s4_class\nreturn an object inheriting from the expected S4 class?\n\n\nexpect_setequal\nreturn a vector containing the expected values?\n\n\nexpect_silent\nexecute silently?\n\n\nexpect_true\nreturn ‘TRUE’?\n\n\nexpect_type\nreturn an object inheriting from the expected base type?\n\n\nexpect_vector\nreturn a vector with the expected size and/or prototype?\n\n\nexpect_visible\nreturn a visible object?\n\n\nexpect_warning\nthrow warning?"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#how-to-check-the-package-quality",
+    "href": "slides/03_tests_shiny.html#how-to-check-the-package-quality",
+    "title": "3. More on tests and Shiny development",
+    "section": "How to check the package quality?",
+    "text": "How to check the package quality?\n\npkgbuild: Tools needed to build R packages\nrcmdcheck: Run R CMD check from R and capture results\ndevtools: Tools to make developing R packages easier, e.g., check() automatically builds and checks a source package, using all known best practices"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#how-to-improve-the-test-coverage",
+    "href": "slides/03_tests_shiny.html#how-to-improve-the-test-coverage",
+    "title": "3. More on tests and Shiny development",
+    "section": "How to improve the test coverage?",
+    "text": "How to improve the test coverage?\ncovr: Track and report code coverage for your package\n\nlibrary(covr)\nx &lt;- package_coverage()\nreport(x)"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#example-on-test-coverage",
+    "href": "slides/03_tests_shiny.html#example-on-test-coverage",
+    "title": "3. More on tests and Shiny development",
+    "section": "Example on test coverage",
+    "text": "Example on test coverage\nLet’s assume we have added a generic function to cat a simulation result:\n\n#'\n#' @export\n#'\ncat.SimulationResult &lt;- function(... , file = \"\", sep = \" \",\n        fill = FALSE, labels = NULL, append = FALSE) {\n    args &lt;- list(...)\n}\n\n\nBut we forgot to finalize the implementation and didn’t create unit tests.\nRe-execution of\n\nreport(package_coverage())\n\nthen results in…"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#example-on-test-coverage-1",
+    "href": "slides/03_tests_shiny.html#example-on-test-coverage-1",
+    "title": "3. More on tests and Shiny development",
+    "section": "Example on test coverage",
+    "text": "Example on test coverage"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#example-on-test-coverage-2",
+    "href": "slides/03_tests_shiny.html#example-on-test-coverage-2",
+    "title": "3. More on tests and Shiny development",
+    "section": "Example on test coverage",
+    "text": "Example on test coverage\nWe can go into the details by clicking on a file name:"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#why-are-best-practices-important-for-shiny",
+    "href": "slides/03_tests_shiny.html#why-are-best-practices-important-for-shiny",
+    "title": "3. More on tests and Shiny development",
+    "section": "Why are best practices important for Shiny?",
+    "text": "Why are best practices important for Shiny?\n\nShiny is in itself more complex than usual R code\nSmall apps can quickly evolve into giant apps\nIt seems first possible to test everything by hand, clicking around\nFor one-off, throw-away, one-screen Shiny apps that is ok\nHere we talk about best practices for more-than-once used Shiny apps"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#design-collaborate-with-your-customer",
+    "href": "slides/03_tests_shiny.html#design-collaborate-with-your-customer",
+    "title": "3. More on tests and Shiny development",
+    "section": "Design: Collaborate with your customer",
+    "text": "Design: Collaborate with your customer\n\nInvolve your customer from the first ideation\nIdentify the roles and responsibilities\nMake reasonable assumptions about user skills and knowledge\nShow early wireframes, prototypes, beta versions and get feedback"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#ui-design-wireframing",
+    "href": "slides/03_tests_shiny.html#ui-design-wireframing",
+    "title": "3. More on tests and Shiny development",
+    "section": "UI Design: Wireframing",
+    "text": "UI Design: Wireframing\n\nWireframing is powerful for aligning in customer discussions\nFocus on the vision and functionality\nKeep the UI as simple as possible\nKnow your target as developer during coding and review process\nWireframing software:\n\ndraw.io\nBalsamiq\nMockplus"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#ui-design-example-wireframe",
+    "href": "slides/03_tests_shiny.html#ui-design-example-wireframe",
+    "title": "3. More on tests and Shiny development",
+    "section": "UI Design: Example wireframe",
+    "text": "UI Design: Example wireframe"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#shiny-specific-tool-shinyuieditor",
+    "href": "slides/03_tests_shiny.html#shiny-specific-tool-shinyuieditor",
+    "title": "3. More on tests and Shiny development",
+    "section": "Shiny specific tool: ShinyUiEditor",
+    "text": "Shiny specific tool: ShinyUiEditor"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#architecture-minimize-code-in-shiny",
+    "href": "slides/03_tests_shiny.html#architecture-minimize-code-in-shiny",
+    "title": "3. More on tests and Shiny development",
+    "section": "Architecture: Minimize code in Shiny",
+    "text": "Architecture: Minimize code in Shiny\n\nMinimize the code inside the Shiny UI/server\nBecause it will always be easier to test things that live outside of Shiny\nLet’s look at an example from the Mastering Shiny book"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#minimize-shiny-example-before",
+    "href": "slides/03_tests_shiny.html#minimize-shiny-example-before",
+    "title": "3. More on tests and Shiny development",
+    "section": "Minimize Shiny Example: Before",
+    "text": "Minimize Shiny Example: Before\n\n\n\nserver &lt;- function(input, output, session) {\n  data &lt;- reactive({\n    req(input$file)\n    name &lt;- input$file$name\n    path &lt;- input$file$datapath\n    ext &lt;- tools::file_ext(name)\n    switch(ext,\n      csv = vroom::vroom(path, \",\"),\n      tsv = vroom::vroom(path, \"\\t\"),\n      validate(\"Invalid file\")\n    )\n  })\n  \n  output$head &lt;- renderTable({\n    head(data(), input$n)\n  })\n}\n\n\nThe ext and switch() part validates the file extension and then loads the file.\nIndependent of Shiny reactive!"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#minimize-shiny-example-after",
+    "href": "slides/03_tests_shiny.html#minimize-shiny-example-after",
+    "title": "3. More on tests and Shiny development",
+    "section": "Minimize Shiny Example: After",
+    "text": "Minimize Shiny Example: After\n\n\n\nload_file &lt;- function(name, path) {\n  ext &lt;- tools::file_ext(name)\n  switch(ext,\n    csv = vroom::vroom(path, \",\"),\n    tsv = vroom::vroom(path, \"\\t\"),\n    validate(\"Invalid file\")\n  )\n}\n\nserver &lt;- function(input, output, session) {\n  data &lt;- reactive({\n    req(input$file)\n    load_file(\n      input$file$name, \n      input$file$datapath\n    )\n  })\n  \n  output$head &lt;- renderTable({\n    head(data(), input$n)\n  })\n}\n\n\n\nnormal function, validate() will give a simple error outside of Shiny\nserver is much easier to read now and only half the size\ncan test load_file() interactively in console\ncan unit tests load_file() separately (business as usual)"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#minimize-shiny-separate-packages",
+    "href": "slides/03_tests_shiny.html#minimize-shiny-separate-packages",
+    "title": "3. More on tests and Shiny development",
+    "section": "Minimize Shiny: Separate packages",
+    "text": "Minimize Shiny: Separate packages\n\nOn the macro level, this also applies to packages\nLarger Shiny apps will need to live as an R package\nThe business logic best lives in another R package\nThat package can then also be used without the Shiny interface\nYou can use {staged.dependencies} to allow “joint” pull requests\nExample from the NEST package ecosystem:\n\n{teal.modules.clinical} as the Shiny package\n{tern} as a business logic package"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#modules-building-blocks-of-the-shiny-app",
+    "href": "slides/03_tests_shiny.html#modules-building-blocks-of-the-shiny-app",
+    "title": "3. More on tests and Shiny development",
+    "section": "Modules: Building blocks of the Shiny app",
+    "text": "Modules: Building blocks of the Shiny app\n\nShiny modules generalize functions\nAllows to coordinate UI and server code\nBreaks the app code into reusable and testable units\nLet’s look at an example from the Mastering Shiny book"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#modules-example-before",
+    "href": "slides/03_tests_shiny.html#modules-example-before",
+    "title": "3. More on tests and Shiny development",
+    "section": "Modules Example: Before",
+    "text": "Modules Example: Before\n\n\n\n\n\n\n\n\n\nDifficult to understand what is going on\nNeed longer names / parentheses to differentiate tables / plots / variables in different places\nHard to test"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#modules-example-after",
+    "href": "slides/03_tests_shiny.html#modules-example-after",
+    "title": "3. More on tests and Shiny development",
+    "section": "Modules Example: After",
+    "text": "Modules Example: After\n\n\n\n\n\n\n\n\n\nCan easily see the 4 different parts of the app\nNaming becomes simpler for vars / tables / plots\nCan reuse the modules separately in other apps\nCan test the modules separately"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#modules-considerations-similar-to-functions",
+    "href": "slides/03_tests_shiny.html#modules-considerations-similar-to-functions",
+    "title": "3. More on tests and Shiny development",
+    "section": "Modules: Considerations similar to Functions",
+    "text": "Modules: Considerations similar to Functions\n\nWhat should be configurable?\n\nThink about reuse needs for module\n\nHow to organize arguments?\n\nUse consistent naming conventions\nKeep the right order of the arguments\n\nAvoid dependencies between arguments\n\nUse instead parameter object pattern\n\nHow to write good and maintainable code?\n\nFollow all the clean code rules from the previous chapter!"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#reactivity-1",
+    "href": "slides/03_tests_shiny.html#reactivity-1",
+    "title": "3. More on tests and Shiny development",
+    "section": "Reactivity",
+    "text": "Reactivity\nWhen building production shiny apps you won’t get around learning reactivity.\nSome guidance:\n\nKeep user interface simple → often keeps reactivity simple → often less confusing to user\nResolve reactive inputs early on & validate generously\nDesign towards “stringy” reactivity graphs\nDon’t interrupt reactivity\nPreferably use\n\nreactive over reactiveValues\nobserveEvent over observe"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#reactivity-resolve-early-validate",
+    "href": "slides/03_tests_shiny.html#reactivity-resolve-early-validate",
+    "title": "3. More on tests and Shiny development",
+    "section": "Reactivity: Resolve early & validate",
+    "text": "Reactivity: Resolve early & validate\n\nserver &lt;- function(input, output, session) {\n  output$plot &lt;- renderPlot({\n    # Resolve reactive values.\n    xvar &lt;- input$xvar\n    yvar &lt;- input$yvar\n    req(xvar, yvar)\n    \n    # Validate – is it likely that the plot will be meaningful?\n    validate(\n      need(xvar %in% names(df), glue(\"xvar \\\"{xvar}\\\" does not exist\")),\n      need(yvar %in% names(df), glue(\"yvar \\\"{yvar}\\\" does not exist\")),\n      need(nrow(df) &gt; 3, \"too few data points for meaningful plot\")\n    )\n    \n    my_special_plot(df[[xvar]], df[[yvar]])\n  })\n}"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#reactivity-debugging-techniques",
+    "href": "slides/03_tests_shiny.html#reactivity-debugging-techniques",
+    "title": "3. More on tests and Shiny development",
+    "section": "Reactivity: Debugging techniques",
+    "text": "Reactivity: Debugging techniques\n\nPut browser() into the functions\nJump into browser mode upon error with options(shiny.error = browser)\nJust put print() inside the reactives\nSave variables to global environment via .GlobalEnv$var &lt;- var and then check\nSimplify things until it works and then go back"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#reactivity-graph-visualization",
+    "href": "slides/03_tests_shiny.html#reactivity-graph-visualization",
+    "title": "3. More on tests and Shiny development",
+    "section": "Reactivity: Graph visualization",
+    "text": "Reactivity: Graph visualization\nTo understand the order of execution we can visualize the reactive graph, which describes how sources and endpoints are connected via conductors.\n\n\n\ne.g. input\n\ne.g. reactive\n\ne.g. output"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#reactivity-stringy-reactivity-graph",
+    "href": "slides/03_tests_shiny.html#reactivity-stringy-reactivity-graph",
+    "title": "3. More on tests and Shiny development",
+    "section": "Reactivity: “Stringy” reactivity graph",
+    "text": "Reactivity: “Stringy” reactivity graph\n\n\nBad  Many edges, difficult to anticipate reactivity behaviour\n\nGood  This “stringy” reactivity graph is easier to understand and debug"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#live-demo-app-structure",
+    "href": "slides/03_tests_shiny.html#live-demo-app-structure",
+    "title": "3. More on tests and Shiny development",
+    "section": "Live demo: app structure",
+    "text": "Live demo: app structure\nInspect the completed app and its module in the session 3 download."
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#testing-from-icecream-to-pyramid",
+    "href": "slides/03_tests_shiny.html#testing-from-icecream-to-pyramid",
+    "title": "3. More on tests and Shiny development",
+    "section": "Testing: From Icecream to Pyramid",
+    "text": "Testing: From Icecream to Pyramid\n\n\nBad\n\n\ncannot always test manually\ncan easily introduce bugs\n\n\nGood\n\n\nmanual testing is reduced\nonly for “playing around”"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#testing-snapshot-tests-for-ui",
+    "href": "slides/03_tests_shiny.html#testing-snapshot-tests-for-ui",
+    "title": "3. More on tests and Shiny development",
+    "section": "Testing: Snapshot tests for UI",
+    "text": "Testing: Snapshot tests for UI\n\n\n\ntest_that(\"myInput UI works\", {\n  input &lt;- \"foo\"\n  set.seed(123)\n  datasets &lt;- mock_datasets()\n  expect_snapshot(myInput(\n    \"my_test\",\n    datasets = datasets,\n    input = input\n  ))\n})\n\n\n\nShiny UI functions return shiny.tag objects which print as HTML code\nCan use snapshot tests to avoid accidental changes\nValue is limited\nCan create issues sometimes (non-reproducible hashes)"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#testing-shiny-server-tests",
+    "href": "slides/03_tests_shiny.html#testing-shiny-server-tests",
+    "title": "3. More on tests and Shiny development",
+    "section": "Testing: Shiny server tests",
+    "text": "Testing: Shiny server tests\n\n\n\ntest_that(\"server works\", {\n  testServer(server, {\n    session$setInputs(...)\n\n    print(reactive1())\n    print(output$output1)\n    # etc\n\n    # To interactively play:\n    # browser()\n  \n    expect_equal(...)\n    # etc.\n  })\n})\n\n\n\nCode is run inside the server function\nCan access reactives, outputs, etc.\nSession object simulates user actions and time\nNote: need to insert browser()\nAlso works for module server functions\nLimitation: No UI, no JavaScript"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#testing-shiny-app-tests",
+    "href": "slides/03_tests_shiny.html#testing-shiny-app-tests",
+    "title": "3. More on tests and Shiny development",
+    "section": "Testing: Shiny app tests",
+    "text": "Testing: Shiny app tests\n\n\n\nlibrary(shinytest2)\ntest_that(\"my app works\", {\n  app &lt;- AppDriver$new(\n    app_dir = \"myAppDir\",\n    load_timeout = 1e5,\n    variant = platform_variant()\n  ) # app$get_logs()\n  app$wait_for_idle(timeout = 1e5)\n  app$get_screenshot()\n  app$set_inputs(name = \"Hadley\")\n  app$get_value(\"greeting\")\n  app$click(\"reset\")\n  app$get_value(\"greeting\")\n})\n\n\n\nUsually the app is defined in myAppDir/app.R\nNew app instance app from AppDriver$new()\nFull Shiny app in a headless chromote browser\nCan look into it via app$get_screenshot()\nWe can set inputs, get values of inputs/outputs, click buttons etc."
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#security",
+    "href": "slides/03_tests_shiny.html#security",
+    "title": "3. More on tests and Shiny development",
+    "section": "Security",
+    "text": "Security\n\nNever include passwords in your source code! Instead:\n\nUse environment variables\nOr use the {config} package\nAny files containing passwords must be added to .gitignore\n\nFor user authentication, start with existing solutions that are IT approved\n\nSee some best practices here and here.\n\nCode run in server() is isolated and cannot be seen by other users\n\nBut global environment, e.g. options, are shared across sessions\n\nCheck all user input via assertions or validations to avoid JavaScript hacking"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#packaging",
+    "href": "slides/03_tests_shiny.html#packaging",
+    "title": "3. More on tests and Shiny development",
+    "section": "Packaging",
+    "text": "Packaging\nThe app should live in an R package. Why? Because we need:\n\nMetadata and dependencies: from DESCRIPTION + NAMESPACE files\nCode split into functions and modules: in files in the the R directory\nDocumentation via vignettes, README, and function and modules documentation\nAutomated tests: using testthat and the native R CMD check\nAble to share the package as tarball or via repositories for installation"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#deployment-options",
+    "href": "slides/03_tests_shiny.html#deployment-options",
+    "title": "3. More on tests and Shiny development",
+    "section": "Deployment Options",
+    "text": "Deployment Options\n\nhttps://www.shinyapps.io/\n\nAllows for quick sharing of Shiny apps on the cloud\nFree version is good for quick tests or experiments\nSerious use needs subscription\n\nInternal Posit Connect is internal alternative\n\nMore features than above cloud service\nOne detail example: can use environment variables\nSee https://posit.co/products/open-source/shinyserver/ for the differences"
+  },
+  {
+    "objectID": "slides/03_tests_shiny.html#deployment-process",
+    "href": "slides/03_tests_shiny.html#deployment-process",
+    "title": "3. More on tests and Shiny development",
+    "section": "Deployment Process",
+    "text": "Deployment Process\nYou’ll need few extra steps:\n\nInstruct the server how to run the app in the package. Simplest is app.R in package root folder containing:\n\npkgload::load_all(\".\")\nmyApp() # = function in your package calling shinyApp()\n\nIgnore the app.R for package build\nInclude shiny and pkgload to the Imports in the DESCRIPTION file\nRun rsconnect::deployApp() to share the updated app version!"
+  }
+]

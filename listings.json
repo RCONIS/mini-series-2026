@@ -1,0 +1,11 @@
+[
+  {
+    "listing": "/listing.html",
+    "items": [
+      "/slides/01_packages.html",
+      "/slides/02_workflow_tests.html",
+      "/slides/03_tests_shiny.html",
+      "/slides/04_optimization_ai.html"
+    ]
+  }
+]
